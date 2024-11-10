@@ -1,0 +1,18 @@
+input: "/Users/mitch/Documents/Papers_2025/SSID_IVR_Study/data/gaze_videos/SSID AV1/Gaze Replays/ScreenRecording-1 - P48.mp4"
+output_prefix: "/Users/mitch/Documents/Papers_2025/SSID_IVR_Study/data/outputs/segmentations"
+# Model configuration
+model:
+  name: "facebook/mask2former-swin-large-cityscapes-semantic"
+  model_type: null  # Optional: can be 'beit', 'mask2former', or null for auto-detection
+  max_size: null  # Optional: maximum size for input images/frames
+  device: "mps"  # Options: "cuda", "cpu", "mps", or null for auto-detection
+  dataset: "semantic-sidewalk"  # Optional: dataset name for model-specific postprocessing
+  num_workers: 0  # Number of workers for data loading
+  pipe_batch: 5  # Number of frames to process in each batch. Recommend setting this equal to batch_size below.
+frame_step: 5  # For video processing, process every 5th frame
+save_raw_segmentation: true
+save_colored_segmentation: true
+save_overlay: true
+visualization:
+  alpha: 0.5
+  colormap: default
