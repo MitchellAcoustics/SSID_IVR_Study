@@ -1,0 +1,4 @@
+#Study Name : SSID AV1
+#Study Date : 02/03/2023 18:25:11
+Stim_Name,System Load Monitor_SamplingRate,Eye tracking_SamplingRate,Eye tracking_Quality
+ScreenRecording-1,1,98,96
