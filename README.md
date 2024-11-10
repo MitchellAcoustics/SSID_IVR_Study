@@ -14,8 +14,8 @@ This project is in a draft state.
      - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
      - [Juptyer](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
      - [Quarto](https://marketplace.visualstudio.com/items?itemName=quarto-dev.quarto-vscode)
+     - [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
    - [uv](https://docs.astral.sh/uv/)
-   - [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
    - [Github Desktop](https://desktop.github.com/)
 
      ```bash
