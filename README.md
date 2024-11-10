@@ -57,7 +57,7 @@ To do a full render of the manuscript, run the following command in the terminal
 quarto render
 ```
 
-This will render the manuscript to a PDF and HTML file in the `output` folder.
+This will render the manuscript to a PDF and HTML file in the `_manuscript` folder.
 
 ### Saving / Committing Changes
 
