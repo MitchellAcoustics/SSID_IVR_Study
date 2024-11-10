@@ -1,0 +1,52 @@
+project:
+  type: manuscript
+
+manuscript:
+  article: manuscript.qmd
+  code-links:
+    - binder
+    - repo
+  notebooks:
+    - ./notebooks/data-screening.ipynb
+
+notebook-links: global
+
+execute:
+  freeze: auto
+
+format:
+  html:
+    toc: true
+    comments:
+      hypothesis: true
+    theme:
+      light: flatly
+      dark: superhero
+    smooth-scroll: true
+
+  docx: default
+  jats: default
+  
+  elsevier-pdf:
+    latex-clean: true
+    keep-tex: false
+    echo: false
+    hyperrefoptions: 
+      - "citecolor=black"
+    journal:
+      name: Journal of the Acoustical Society of America
+      model: 3p
+      cite-style: authoryear
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+    include-before-body:
+      text: |
+        \RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+          showspaces = false,
+          showtabs = false,
+          breaksymbolleft={},
+          breaklines
+          % Note: setting commandchars=\\\{\} here will cause an error 
+          }

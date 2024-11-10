@@ -1,0 +1,56 @@
+name: Build Notebook Container
+on: 
+  - workflow_dispatch
+  - push
+  # - page_build # You may want to trigger this Action on other things than a push.
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: checkout files in repo
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Check changed files
+      id: changed-files-specific
+      uses: tj-actions/changed-files@v45
+      with:
+        files: |
+          environment.yml
+          pyproject.toml
+          requirements.txt
+          setup.py
+          Pipfile
+          Pipfile.lock
+          Project.toml
+          REQUIRE
+          install.R
+          DESCRIPTION
+          apt.txt
+          postBuild
+          start
+          runtime.txt
+          default.nix
+          Dockerfile
+
+    - name: setup image name
+      id: setup_image_name
+      if: steps.changed-files-specific.outputs.any_changed == 'true'
+      run: |
+        echo "repo_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV # Convert to lowercase
+
+    - name: cache on binderhub
+      if: steps.changed-files-specific.outputs.any_changed == 'true'
+      uses: jupyterhub/repo2docker-action@master
+      with:
+        IMAGE_NAME: ${{ env.repo_name }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        BINDER_CACHE: true
+        PUBLIC_REGISTRY_CHECK: true
