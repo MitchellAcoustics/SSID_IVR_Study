@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# This script is used to run the city segmentation model on the input set.
+uvx cityseg --config config.yaml --log-level DEBUG

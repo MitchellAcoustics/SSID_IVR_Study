@@ -1,6 +1,8 @@
 project:
   type: manuscript
 
+draft: true
+
 manuscript:
   article: manuscript.qmd
   code-links:
