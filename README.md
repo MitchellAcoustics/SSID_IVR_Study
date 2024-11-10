@@ -31,7 +31,7 @@ This project is in a draft state.
 
 2. Clone the repo by pressing the green "Code" button and selecting "Open with Github Desktop" (if you're comfortable with Git, do this however you'd like). Select a location on your computer to save the repo - I recommend not saving it in a OneDrive or Google Drive folder.
 3. Open the repo in VS Code by clicking "Open in Visual Studio Code" in Github Desktop.
-4. **Create a new branch** by clicking the branch name in the bottom left corner of the VS Code window and selecting "Create new branch". I recommend naming the branch something like 'Tin-draft'.
+4. **Create a new branch from the draft** by clicking the branch name in the bottom left corner of the VS Code window and selecting "Create new branch from", then `draft`. **Please make sure to create a new branch from the draft branch**. This will help us keep the main branch clean and make it easier to review changes. I recommend naming the branch something like 'Tin-draft'.
 5. Open a terminal in VS Code by pressing `Ctrl + ~`. For all VS code commands, you can also press `Cmd + Shift + P` and type the command you want to run.
 6. Install the Python dependencies by running the following command in the terminal:
 
