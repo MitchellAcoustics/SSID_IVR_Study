@@ -104,7 +104,7 @@ La Palma is one of the west most islands in the Volcanic Archipelago of the Cana
 
 ## Data & Methods {#sec-data-methods}
 
-## Conclusion
+## Concluding Remarks
 
 Adding some new lines of text to test collaboration.
 
