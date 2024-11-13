@@ -10,24 +10,40 @@ This project is in a draft state.
 
 1. Install the following tools:
 
-   - VS Code. Also install the following extensions:
+   - VS Code (install from website). Also install the following extensions (open VS code and click on the extensions tab on the left):
      - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
      - [Juptyer](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
      - [Quarto](https://marketplace.visualstudio.com/items?itemName=quarto-dev.quarto-vscode)
      - [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
    - [uv](https://docs.astral.sh/uv/)
-   - [Github Desktop](https://desktop.github.com/)
+     
+      Run the following command in your terminal:
 
      ```bash
      curl -LsSf https://astral.sh/uv/install.sh | sh
      ```
 
-   - [Quarto](https://quarto.org/docs/get-started/)
+     Then close your terminal, reopen, and run `uv --version` to verify it installed correctly.
+  
+      - If you have conda installed previously, you may see something like `(base) mitch :~` when opening a terminal. This is because conda activates its `base` environment by default. We should turn that off:
+           ```
+           conda config --set auto_activate_base false
+           ```
+   - [Github Desktop](https://desktop.github.com/) (install from website)
+   - [Quarto](https://quarto.org/docs/get-started/) (install from website)
      - Once installed, run the following command to install LaTeX dependencies if you don't have it already:
 
        ```bash
        quarto install tinytex
        ```
+
+       Then run
+
+       ```
+       quarto check
+       ```
+
+       To check your installation.
 
 2. Clone the repo by pressing the green "Code" button and selecting "Open with Github Desktop" (if you're comfortable with Git, do this however you'd like). Select a location on your computer to save the repo - I recommend not saving it in a OneDrive or Google Drive folder.
 3. Open the repo in VS Code by clicking "Open in Visual Studio Code" in Github Desktop.
