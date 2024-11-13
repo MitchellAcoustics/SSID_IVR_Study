@@ -16,7 +16,7 @@ This project is in a draft state.
      - [Quarto](https://marketplace.visualstudio.com/items?itemName=quarto-dev.quarto-vscode)
      - [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop)
    - [uv](https://docs.astral.sh/uv/)
-     
+
       Run the following command in your terminal:
 
      ```bash
