@@ -26,12 +26,14 @@ This project is in a draft state.
      Then close your terminal, reopen, and run `uv --version` to verify it installed correctly.
   
       - If you have conda installed previously, you may see something like `(base) mitch :~` when opening a terminal. This is because conda activates its `base` environment by default. We should turn that off:
+
            ```
            conda config --set auto_activate_base false
            ```
+
    - [Github Desktop](https://desktop.github.com/) (install from website)
    - [Quarto](https://quarto.org/docs/get-started/) (install from website)
-     - Once installed, run the following command to install LaTeX dependencies if you don't have it already:
+     - Once installed, run the following command to install LaTeX dependencies if you don't it already:
 
        ```bash
        quarto install tinytex
