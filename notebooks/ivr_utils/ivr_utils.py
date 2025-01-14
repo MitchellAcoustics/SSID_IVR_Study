@@ -30,7 +30,7 @@ import subprocess  # For ffmpeg operations
 import logging  # For operation logging
 from typing import Union, Optional, Tuple, List
 import av  # For advanced video operations
-
+import pandas as pd 
 
 def find_participant_files(
     participant_id: str, data_dir: Path | str
@@ -338,3 +338,87 @@ def pyav_timestamps(video: Path, index: int = 0) -> List[int]:
     av_timestamps.sort()
 
     return av_timestamps
+
+
+def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points):
+
+    # read the video
+    video = cv2.VideoCapture(input_video_path.as_posix())
+    fps = video.get(cv2.CAP_PROP_FPS)
+    total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    # VideoWriter mp4-mp4v format
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out_chopped = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
+    
+    current_point_index = 0
+    skip_frames = False
+
+    for frame_index in range(total_frames):
+        if frame_index > n_frames_proc:
+            break
+
+        ret, frame = video.read()
+        if not ret:
+            break
+
+        current_time = frame_index / fps * 1000
+
+        while (
+            current_point_index < len(points) - 1
+            and points["Timestamp"].iloc[current_point_index + 1] <= current_time
+        ):
+            current_point_index += 1
+
+            if (
+                pd.isna(points["Respondent Annotations active"].iloc[current_point_index])
+                or points["Respondent Annotations active"].iloc[current_point_index] == ""
+            ):
+                skip_frames = True
+            else:
+                skip_frames = False
+
+        if not skip_frames:
+          out_chopped.write(frame)
+
+
+
+
+def overlaying_video(input_video_path, output_overlay_path, n_frames_proc, points):
+    
+    # read the video
+    video = cv2.VideoCapture(input_video_path.as_posix())
+    fps = video.get(cv2.CAP_PROP_FPS)
+    total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    # VideoWriter mp4-mp4v format
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out_overlay = cv2.VideoWriter(output_overlay_path, fourcc, fps, (width, height))
+    
+    current_point_index = 0
+    for frame_index in range(total_frames):
+        if frame_index > n_frames_proc:
+            break
+
+        ret, frame = video.read()
+        if not ret:
+            break
+
+        current_time = frame_index / fps * 1000
+
+        while (
+            current_point_index < len(points) - 1
+            and points["Timestamp"].iloc[current_point_index + 1] <= current_time
+        ):
+            current_point_index += 1
+
+        if current_point_index < len(points):
+            row = points.iloc[current_point_index]
+            x, y = int(row["Gaze X"]), int(row["Gaze Y"])
+            cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
+
+        out_overlay.write(frame)
