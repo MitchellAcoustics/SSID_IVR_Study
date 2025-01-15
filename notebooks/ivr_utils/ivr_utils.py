@@ -168,6 +168,7 @@ def _validate_video(
 def convert_wmv_to_mp4(
     input_wmv_path: Union[Path, str],
     output_mp4_path: Optional[Union[Path, str]] = None,
+    output_fps: Optional[int] = None,
     full_validation: bool = True,
 ) -> ConversionResult:
     """Convert WMV video to MP4 format using Apple Silicon hardware acceleration.
@@ -239,6 +240,10 @@ def convert_wmv_to_mp4(
     # Perform conversion
     logger.info("Converting WMV to MP4")
     try:
+        if output_fps is None:
+            fps_items = [None, None]
+        else:
+            fps_items = ["-r", str(output_fps)]
         # fmt: off
         result = subprocess.run(
             [
@@ -263,7 +268,8 @@ def convert_wmv_to_mp4(
                 
                 # To force 30 fps - much slower, unsure if needed
                 # "-fps_mode", "cfr",
-                # "-r", "30",
+                #  "-r", "30",
+                # fps_items[0], fps_items[1],
 
                 "-an",  # no audio
                 "-y",  # overwrite output file
@@ -340,6 +346,9 @@ def pyav_timestamps(video: Path, index: int = 0) -> List[int]:
     return av_timestamps
 
 
+
+
+
 def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points):
 
     # read the video
@@ -351,7 +360,7 @@ def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points)
     
     # VideoWriter mp4-mp4v format
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out_chopped = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
+    out_chopping = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
     
     current_point_index = 0
     skip_frames = False
@@ -381,7 +390,13 @@ def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points)
                 skip_frames = False
 
         if not skip_frames:
-          out_chopped.write(frame)
+          out_chopping.write(frame)
+
+    video.release()
+    out_chopping.release()
+    cv2.destroyAllWindows()
+
+
 
 
 
@@ -422,3 +437,7 @@ def overlaying_video(input_video_path, output_overlay_path, n_frames_proc, point
             cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
 
         out_overlay.write(frame)
+    
+    video.release()
+    out_chopping.release()
+    cv2.destroyAllWindows()
