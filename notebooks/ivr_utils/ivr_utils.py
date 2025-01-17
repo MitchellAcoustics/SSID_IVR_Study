@@ -400,8 +400,7 @@ def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points)
 
 
 
-
-def overlaying_video(input_video_path, output_overlay_path, n_frames_proc, points):
+def overlaying_video(input_video_path, output_chopped_path, n_frames_proc, points):
     
     # read the video
     video = cv2.VideoCapture(input_video_path.as_posix())
@@ -412,7 +411,7 @@ def overlaying_video(input_video_path, output_overlay_path, n_frames_proc, point
     
     # VideoWriter mp4-mp4v format
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out_overlay = cv2.VideoWriter(output_overlay_path, fourcc, fps, (width, height))
+    out_overlay = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
     
     current_point_index = 0
     for frame_index in range(total_frames):
@@ -437,7 +436,7 @@ def overlaying_video(input_video_path, output_overlay_path, n_frames_proc, point
             cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
 
         out_overlay.write(frame)
-    
+
     video.release()
-    out_chopping.release()
+    out_overlay.release()
     cv2.destroyAllWindows()
