@@ -46,6 +46,7 @@ keywords:
   - Earthquakes
   - Soundscape
   - Immersive Virtual Reality
+  - Eye Tracking
 abstract: |
   In September 2021, a significant jump in seismic activity on the island of La Palma (Canary Islands, Spain) signaled the start of a volcanic crisis that still continues at the time of writing. Earthquake data is continually collected and published by the Instituto Geográphico Nacional (IGN). ...
 plain-language-summary: |
@@ -54,7 +55,6 @@ key-points:
   - A web scraping script was developed to pull data from the Instituto Geogràphico Nacional into a machine-readable form for analysis
   - Earthquake events on La Palma are consistent with the presence of both mantle and crustal reservoirs.
 date: last-modified
-bibliography: references.bib
 citation:
   container-title: Earth and Space Science
 number-sections: true
@@ -65,7 +65,7 @@ number-sections: true
 
 Making a change here.
 
-Based on data up to and including 1971, eruptions on La Palma happen every  years on average.
+Based on data up to and including 1971 @Mitchell2022How, eruptions on La Palma happen every  years on average.
 
 Studies of the magma systems feeding the volcano, such as @marrero2019, have proposed that there are two main magma reservoirs feeding the Cumbre Vieja volcano; one in the mantle (30-40km depth) which charges and in turn feeds a shallower crustal reservoir (10-20km depth).
 
@@ -122,12 +122,15 @@ The experiment consisted of three blocks within which the 27 stimuli were presen
 ## Laboratory setup
 
 The experiment was conducted in a listening chamber featuring twelve coaxial active speakers (Genelec 8331) arranged to provide Second Order Ambisonic playback, while the visual stimuli were delivered via an Immersive Virtual Reality (IVR) Head-Mounted Display (HMD), as shown in Figure 1. The participant was required to be sitting on a highchair with their head in a “sweet spot” – as close as possible to the point that is equally distant from the centre of all the twelve speakers.
+
 The questionnaire was deployed within the IVR simulation created in Unity and operated by a participant via joystick.
 
 ## Pilot experiment
 
 Two pilot experiments were conducted: 1) Investigating the applicability of the Method A questionnaire to assess the perceived affective quality of the video scenes without the audio stimuli (12); 2) Optimising the stimuli selection to cover the full circumplex model associated with the eight dimensions employed in the Method A.
+
 The first pilot experiment featured 39 different scenes and revealed a good coverage of the calm and eventful space. The annoying and uneventful dimensions were not covered which could mean that either visual context cannot generate a monotonous outcome in an urban space, or that the dataset is missing more stimuli that would address that segment of the circumplex space (12).
+
 This led to further twelve field recordings made specifically to target the annoying, monotonous and uneventful area of the circumplex model.
 
 ### Stimuli selection
@@ -140,9 +143,9 @@ Adding some new lines of text to test collaboration. And more comments
 
 # References {.unnumbered}
 
+::: {#refs}
+:::
+
 # Acknowledgements
 
 This research was funded through the European Research Council (ERC) Advanced Grant (no.740696) on “Soundscape Indices” (SSID). We want to thank Ms Xinrui Xu, Mr Daniel Perski and Ms Hui-Zhong Zhang for their support with data collection and experimental setup.
-
-::: {#refs}
-:::
