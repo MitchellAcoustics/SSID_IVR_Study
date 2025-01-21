@@ -30,7 +30,11 @@ import subprocess  # For ffmpeg operations
 import logging  # For operation logging
 from typing import Union, Optional, Tuple, List
 import av  # For advanced video operations
-import pandas as pd 
+import pandas as pd
+from tqdm.auto import tqdm, trange
+
+logger = logging.getLogger(__name__)
+
 
 def find_participant_files(
     participant_id: str, data_dir: Path | str
@@ -214,8 +218,6 @@ def convert_wmv_to_mp4(
         - Removes audio track
         - Uses full color range
     """
-    logger = logging.getLogger(__name__)
-
     input_path = _ensure_path(input_wmv_path)
     output_path = (
         _ensure_path(output_mp4_path)
@@ -240,13 +242,8 @@ def convert_wmv_to_mp4(
     # Perform conversion
     logger.info("Converting WMV to MP4")
     try:
-        if output_fps is None:
-            fps_items = [None, None]
-        else:
-            fps_items = ["-r", str(output_fps)]
         # fmt: off
-        result = subprocess.run(
-            [
+        cmd = [
                 "ffmpeg",
 
                 # Hardware acceleration for Apple Silicon
@@ -269,14 +266,17 @@ def convert_wmv_to_mp4(
                 # To force 30 fps - much slower, unsure if needed
                 # "-fps_mode", "cfr",
                 #  "-r", "30",
-                # fps_items[0], fps_items[1],
+                *(["-r", str(output_fps)] if output_fps else []),
 
                 "-an",  # no audio
                 "-y",  # overwrite output file
                 "-stats",  # show progress
                 "-v", "warning",  # show warnings
                 output_path.as_posix(),
-            ],
+            ]
+        logger.debug(f"Running command: {' '.join(cmd)}")
+        result = subprocess.run(
+            cmd,
             capture_output=False,  # Let stats print to console
             text=True,
             bufsize=1,  # Line buffered output
@@ -346,29 +346,27 @@ def pyav_timestamps(video: Path, index: int = 0) -> List[int]:
     return av_timestamps
 
 
-
-
-
-def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points):
-
+def chopping_video(input_video_path, output_chopped_path, points, n_frames_proc=None):
     # read the video
+    logger.info(f"chopping_video - Reading video from {input_video_path}")
     video = cv2.VideoCapture(input_video_path.as_posix())
     fps = video.get(cv2.CAP_PROP_FPS)
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    n_frames_proc = n_frames_proc or total_frames
     width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    
+
     # VideoWriter mp4-mp4v format
+    logger.debug(
+        f"chopping_video - instantiating VideoWriter with {output_chopped_path}"
+    )
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out_chopping = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
-    
+
     current_point_index = 0
     skip_frames = False
 
-    for frame_index in range(total_frames):
-        if frame_index > n_frames_proc:
-            break
-
+    for frame_index in trange(n_frames_proc):
         ret, frame = video.read()
         if not ret:
             break
@@ -382,42 +380,45 @@ def chopping_video(input_video_path, output_chopped_path, n_frames_proc, points)
             current_point_index += 1
 
             if (
-                pd.isna(points["Respondent Annotations active"].iloc[current_point_index])
-                or points["Respondent Annotations active"].iloc[current_point_index] == ""
+                pd.isna(
+                    points["Respondent Annotations active"].iloc[current_point_index]
+                )
+                or points["Respondent Annotations active"].iloc[current_point_index]
+                == ""
             ):
                 skip_frames = True
             else:
                 skip_frames = False
 
         if not skip_frames:
-          out_chopping.write(frame)
+            out_chopping.write(frame)
+
+    logger.debug("chopping_video - releasing resources")
 
     video.release()
     out_chopping.release()
     cv2.destroyAllWindows()
 
 
-
-
-
-def overlaying_video(input_video_path, output_chopped_path, n_frames_proc, points):
-    
+def overlaying_video(input_video_path, output_chopped_path, points, n_frames_proc=None):
     # read the video
+    logger.debug(f"overlaying_video - Reading video from {input_video_path}")
     video = cv2.VideoCapture(input_video_path.as_posix())
     fps = video.get(cv2.CAP_PROP_FPS)
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    n_frames_proc = n_frames_proc or total_frames
     width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    
+
     # VideoWriter mp4-mp4v format
+    logger.debug(
+        f"overlaying_video - instantiating VideoWriter with {output_chopped_path}"
+    )
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out_overlay = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
-    
-    current_point_index = 0
-    for frame_index in range(total_frames):
-        if frame_index > n_frames_proc:
-            break
 
+    current_point_index = 0
+    for frame_index in trange(n_frames_proc):
         ret, frame = video.read()
         if not ret:
             break
