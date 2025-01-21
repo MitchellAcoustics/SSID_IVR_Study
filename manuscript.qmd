@@ -1,23 +1,46 @@
 ---
 title: A Brand New Title, Very Natural Saying Visual Perception Drives Soundscape Perception By A Lot
 author:
-  - name: Steve Purves
-    orcid: 0000-0002-0760-5497
+  - name: Tin Oberman
+    orcid: 0000-0002-0014-0383
     corresponding: true
-    email: steve@curvenote.com
+    email: t.oberman@ucl.ac.uk
     roles:
       - Investigation
       - Project administration
-      - Software
       - Visualization
+      - Writing
+      - Experimental design
+      - Experiment setup
+      - Conducting the experiments
     affiliations:
       - University College London
-  - name: Rowan Cockett
-    orcid: 0000-0002-7859-8394
+  - name: Andrew Mitchell
+    orcid: 0000-0003-0978-5046
     corresponding: false
-    roles: []
+    roles:
+     - Statistical analysis
+     - Coding
+     - Experimental design
     affiliations:
-      - Curvenote
+      - University College London
+  - name: Francesco Aletta
+    orcid: 0000-0003-0351-3189
+    corresponding: false
+    roles:
+     - Experimental design
+     - Revisions
+    affiliations:
+     - University College London
+  - name: Jian Kang
+    orcid: 0000-0001-8995-5636
+    corresponding: false
+    roles:
+     - Experimental design
+     - Project administration
+     - Securing funding
+    affiliations: 
+     - University College London
 keywords:
   - La Palma
   - Earthquakes
