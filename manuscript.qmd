@@ -37,7 +37,7 @@ citation:
 number-sections: true
 ---
 
-## Introduction
+# Introduction
 
 
 Making a change here.
@@ -81,13 +81,45 @@ La Palma is one of the west most islands in the Volcanic Archipelago of the Cana
 
 @fig-spatial-plot shows the location of recent Earthquakes on La Palma.
 
-## Data & Methods {#sec-data-methods}
+# Results
+## Perception
 
-## Concluding
+The preliminary results reveal a good coverage of the two-dimensional perceptual circumplex space and significant differences between perceptual outcomes driven by sound and those driven by visual stimuli. The perceptual outcomes in the two-dimensional circumplex space were calculated from the eight scales, relying on the recommendations outlined in the ISO/TS 12913-3(13) and visualised in the Figure 2 using the Soundscapy tool (8)
+
+## Behaviour
+## Effect of visual context
+# Discussion
+# Data & Methods {#sec-data-methods}
+## Ethical statement
+## Participants
+## Task
+
+The experiment consisted of three blocks within which the 27 stimuli were presented in random order, including a neutral grey environment without any sounds being reproduced which represented the baseline scenario. First block featured only auditory stimuli with a neutral grey environment presented in the HMD, the second block featured only 15s long video samples similar to (12), while the third block featured both audio and visual recordings combined. The participants were advised to take frequent breaks, one within each block but more were allowed upon request.
+
+## Laboratory setup
+
+The experiment was conducted in a listening chamber featuring twelve coaxial active speakers (Genelec 8331) arranged to provide Second Order Ambisonic playback, while the visual stimuli were delivered via an Immersive Virtual Reality (IVR) Head-Mounted Display (HMD), as shown in Figure 1. The participant was required to be sitting on a highchair with their head in a “sweet spot” – as close as possible to the point that is equally distant from the centre of all the twelve speakers.
+The questionnaire was deployed within the IVR simulation created in Unity and operated by a participant via joystick.
+
+## Pilot experiment
+
+Two pilot experiments were conducted: 1) Investigating the applicability of the Method A questionnaire to assess the perceived affective quality of the video scenes without the audio stimuli (12); 2) Optimising the stimuli selection to cover the full circumplex model associated with the eight dimensions employed in the Method A.
+The first pilot experiment featured 39 different scenes and revealed a good coverage of the calm and eventful space. The annoying and uneventful dimensions were not covered which could mean that either visual context cannot generate a monotonous outcome in an urban space, or that the dataset is missing more stimuli that would address that segment of the circumplex space (12).
+This led to further twelve field recordings made specifically to target the annoying, monotonous and uneventful area of the circumplex model.
+
+### Stimuli selection
+
+The second pilot study was focused on providing three scenes per each section of the circumplex space in a three by three matrix. Three researchers conducted independent assessments of the 51 videos (the combined audio and video condition) to select the most representative 27 stimuli. After the independent assessment, the outcome was discussed until an agreement was reached. The selected scenes are presented in Table 1.
+
+## Main experiment
 
 Adding some new lines of text to test collaboration. And more comments
 
-## References {.unnumbered}
+# References {.unnumbered}
+
+# Acknowledgements
+
+This research was funded through the European Research Council (ERC) Advanced Grant (no.740696) on “Soundscape Indices” (SSID). We want to thank Ms Xinrui Xu, Mr Daniel Perski and Ms Hui-Zhong Zhang for their support with data collection and experimental setup.
 
 ::: {#refs}
 :::
