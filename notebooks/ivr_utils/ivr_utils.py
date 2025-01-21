@@ -346,9 +346,15 @@ def pyav_timestamps(video: Path, index: int = 0) -> List[int]:
     return av_timestamps
 
 
-def chopping_video(input_video_path, output_chopped_path, points, n_frames_proc=None):
+def process_video(
+    input_video_path,
+    output_chopped_path,
+    output_gazeoverlay_path,
+    points,
+    n_frames_proc=None,
+):
     # read the video
-    logger.info(f"chopping_video - Reading video from {input_video_path}")
+    logger.info(f"process_video - Reading video from {input_video_path}")
     video = cv2.VideoCapture(input_video_path.as_posix())
     fps = video.get(cv2.CAP_PROP_FPS)
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -357,11 +363,29 @@ def chopping_video(input_video_path, output_chopped_path, points, n_frames_proc=
     height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # VideoWriter mp4-mp4v format
-    logger.debug(
-        f"chopping_video - instantiating VideoWriter with {output_chopped_path}"
-    )
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out_chopping = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
+
+    logger.debug(
+        "process_video - Instatiating Chopped Video"
+        if output_chopped_path
+        else "No output_chopped_path"
+    )
+    out_chopping = (
+        cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
+        if output_chopped_path
+        else None
+    )
+
+    logger.debug(
+        "process_video - Instatiating Overlay Video"
+        if output_gazeoverlay_path
+        else "No output_gazeoverlay_path"
+    )
+    out_gazeoverlay = (
+        cv2.VideoWriter(output_gazeoverlay_path, fourcc, fps, (width, height))
+        if output_gazeoverlay_path
+        else None
+    )
 
     current_point_index = 0
     skip_frames = False
@@ -391,53 +415,24 @@ def chopping_video(input_video_path, output_chopped_path, points, n_frames_proc=
                 skip_frames = False
 
         if not skip_frames:
-            out_chopping.write(frame)
+            if out_chopping:
+                out_chopping.write(frame)
+
+            if output_gazeoverlay_path:
+                x, y = gaze_overlay_coords(points, current_point_index)
+                cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
+                out_gazeoverlay.write(frame)
 
     logger.debug("chopping_video - releasing resources")
 
     video.release()
-    out_chopping.release()
+    if out_chopping:
+        out_chopping.release()
+    if out_gazeoverlay:
+        out_gazeoverlay.release()
     cv2.destroyAllWindows()
 
 
-def overlaying_video(input_video_path, output_chopped_path, points, n_frames_proc=None):
-    # read the video
-    logger.debug(f"overlaying_video - Reading video from {input_video_path}")
-    video = cv2.VideoCapture(input_video_path.as_posix())
-    fps = video.get(cv2.CAP_PROP_FPS)
-    total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-    n_frames_proc = n_frames_proc or total_frames
-    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    # VideoWriter mp4-mp4v format
-    logger.debug(
-        f"overlaying_video - instantiating VideoWriter with {output_chopped_path}"
-    )
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out_overlay = cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
-
-    current_point_index = 0
-    for frame_index in trange(n_frames_proc):
-        ret, frame = video.read()
-        if not ret:
-            break
-
-        current_time = frame_index / fps * 1000
-
-        while (
-            current_point_index < len(points) - 1
-            and points["Timestamp"].iloc[current_point_index + 1] <= current_time
-        ):
-            current_point_index += 1
-
-        if current_point_index < len(points):
-            row = points.iloc[current_point_index]
-            x, y = int(row["Gaze X"]), int(row["Gaze Y"])
-            cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
-
-        out_overlay.write(frame)
-
-    video.release()
-    out_overlay.release()
-    cv2.destroyAllWindows()
+def gaze_overlay_coords(points, current_point_index):
+    row = points.iloc[current_point_index]
+    return int(row["Gaze X"]), int(row["Gaze Y"])
