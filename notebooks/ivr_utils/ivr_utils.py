@@ -69,7 +69,7 @@ def find_participant_files(
     part_csv_path = part_csv_path.resolve()
 
     # Find eyetracking video
-    scenario_vid_dir = part_csv_path.parent / "Gaze Replays"
+    scenario_vid_dir = part_csv_path.parents[1] / "Screen Recording"
     part_vid_l = list(scenario_vid_dir.rglob(f"*{participant_id}*.wmv"))
     assert len(part_vid_l) == 1, "Participant video not found or more than one found"
 
