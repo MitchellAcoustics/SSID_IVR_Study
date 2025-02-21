@@ -24,6 +24,15 @@ author:
      - Experimental design
     affiliations:
       - University College London
+  - name: Yuqi Liang
+    orcid: 0009-0004-8276-5169
+    corresponding: false
+    roles:
+    - Data analysis
+    - Writing
+    - Revisions
+    affiliations:
+      - University College London
   - name: Francesco Aletta
     orcid: 0000-0003-0351-3189
     corresponding: false
@@ -48,15 +57,9 @@ keywords:
   - Immersive Virtual Reality
   - Eye Tracking
 abstract: |
-  In September 2021, a significant jump in seismic activity on the island of La Palma (Canary Islands, Spain) signaled the start of a volcanic crisis that still continues at the time of writing. Earthquake data is continually collected and published by the Instituto Geográphico Nacional (IGN). ...
-plain-language-summary: |
-  Earthquake data for the island of La Palma from the September 2021 eruption is found ...
-key-points:
-  - A web scraping script was developed to pull data from the Instituto Geogràphico Nacional into a machine-readable form for analysis
-  - Earthquake events on La Palma are consistent with the presence of both mantle and crustal reservoirs.
+  This study investigates the effect of visual context on soundscape perception in an urban environment. The experiment was conducted in an immersive virtual reality environment, where participants were exposed to audio and visual stimuli. The results show that visual context significantly influences the perceived affective quality of the soundscape. The findings have implications for soundscape design and urban planning.
+  Perception of sound environments is influenced by the context we experience them in. A big portion of the contextual information comes from the visual domain, including our understanding of what a place is but also from its visual features. A laboratory study combining questionnaire responses and eye-tracking tools was designed to investigate if the soundscape outcomes and participants’ behaviour inside the simulation can be explained by the perceptual outcomes defined by visual information. 360 degree videos and First Order Ambisonics audio recordings of 27 different urban open spaces taken from the International Soundscape Database were used as the stimuli delivered via a Virtual Reality Head-Mounted Display and a Higher Order Ambisonics speaker array, while a neutral grey environment without sounds being reproduced represented the baseline scenario. A questionnaire tool was deployed within the IVR simulation to collect participants’ responses describing their perception of the reproduced environments corresponding to the circumplex model featured in the Method A of the ISO/TS 12913-2. The results revealed a good coverage of the two-dimensional perceptual circumplex space and significant differences between perceptual outcomes driven by sound and those driven by visual stimuli. 
 date: last-modified
-citation:
-  container-title: Earth and Space Science
 number-sections: true
 ---
 
@@ -149,22 +152,17 @@ The eyetracking data for participants, including timestamps, gaze coordinates an
 2. Video Format Conversion
 The input videos were checked to ensure compatibility with processing tools. Videos in non-MP4 formats, such as WMV, were converted to MP4 to ensure consistency and avoid compatibility issues.
 
-3. Chopping Video
-The `chopping_video` function was utilized to process and delete the video frames with menus. The process included:
-    - Reading video metadata (e.g., FPS and total number of frames).
-    - Iteratively reading and processing the video frames and chopping the frames with annotation.
+3. Processing Videos
+The `processing_video` function to process and delete the video frames with menu, and overlay the coordinates in the frames. The process included:
+    - Reading video metadata (e.g., FPS and total number of frames) and gaze data (Gaze X, Gaze Y).
+    - Iteratively reading and processing the video frames and determining the current timestamp, then chopping the frames with annotation.
+    - If the frame not going to skip, then matching it with the corrresponding gaze data, then drawing colored circles on the video frames based on the gaze coordinates.
     - Saving the resulting videos to a specified MP4 output path.
-
-
-4. Overlaying Gaze Data
-The `overlaying_video` function was used to annotate the video with gaze data. The process included:
-    - Reading the input video and gaze data (Gaze X, Gaze Y).
-    - Iterating through each frame, determining the current timestamp, and matching it with the corresponding gaze coordinates.
-    - Drawing gaze annotations with colored circles on the video frames based on the gaze coordinates.
+  
 
 
 #### Implementation
-The entire process was implemented in Python using pandas for handling eyetracking data, the OpenCV library for video processin and ffmpeg for video format conversion The workflow ensured that all steps were reproducible and adaptable to different datasets in csv format.
+The entire process was implemented in Python using pandas for handling eyetracking data, the OpenCV library for video processing and ffmpeg for video format conversion The workflow ensured that all steps were reproducible and adaptable to different datasets in csv format.
 
 
 

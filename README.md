@@ -117,7 +117,6 @@ cityseg <path_to_config_file>
 ```
 
 ## Video Processing Function
-
 This repository provides a Python file for processing videos using OpenCV. The primary functionalities include chopping video excluded the frames with menu and overlaying gaze coordinates on the video frames based on annotations, then generating new video outputs.
 
 ### Features
@@ -129,8 +128,8 @@ This repository provides a Python file for processing videos using OpenCV. The p
 ### Workflow
 1. **Import the CSV file for participant data**: Make sure the gaze data for eye-tracking is in a CSV format.
 2. **Check or convert input video to MP4**: Convert to MP4 if not already found.
-3. **Chopping**: Use the `chopping_video` function to process and delete the video frames with menu.
-4. **Overlaying**: Use the `overlaying_video` function to add gaze coordinates overlays to the video.
+3. **Video processing**: Use the `processing_video` function to process and delete the video frames with menu, and overlay the coordinates in the frames.
+
 
 ### Notes
 - Ensure that the input video file exists and is accessible.
