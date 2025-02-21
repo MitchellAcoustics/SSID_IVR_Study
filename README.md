@@ -26,12 +26,14 @@ This project is in a draft state.
      Then close your terminal, reopen, and run `uv --version` to verify it installed correctly.
   
       - If you have conda installed previously, you may see something like `(base) mitch :~` when opening a terminal. This is because conda activates its `base` environment by default. We should turn that off:
+
            ```
            conda config --set auto_activate_base false
            ```
+
    - [Github Desktop](https://desktop.github.com/) (install from website)
    - [Quarto](https://quarto.org/docs/get-started/) (install from website)
-     - Once installed, run the following command to install LaTeX dependencies if you don't have it already:
+     - Once installed, run the following command to install LaTeX dependencies if you don't it already:
 
        ```bash
        quarto install tinytex
@@ -113,3 +115,26 @@ Then you can run the script with the following command:
 ```bash
 cityseg <path_to_config_file>
 ```
+
+## Video Processing Function
+
+This repository provides a Python file for processing videos using OpenCV. The primary functionalities include chopping video excluded the frames with menu and overlaying gaze coordinates on the video frames based on annotations, then generating new video outputs.
+
+### Features
+- Converts video format if it is not mp4.
+- Processes video frames to chop frames with menu.
+- Overlays gaze points as annotations on the video.
+- Outputs new processed videos in MP4 format.
+
+### Workflow
+1. **Import the CSV file for participant data**: Make sure the gaze data for eye-tracking is in a CSV format.
+2. **Check or convert input video to MP4**: Convert to MP4 if not already found.
+3. **Chopping**: Use the `chopping_video` function to process and delete the video frames with menu.
+4. **Overlaying**: Use the `overlaying_video` function to add gaze coordinates overlays to the video.
+
+### Notes
+- Ensure that the input video file exists and is accessible.
+- The `points` DataFrame must have properly formatted gaze data and timestamps.
+- The gaze coordinates (`Gaze X` and `Gaze Y`) are measured from the top-left corner of the video frame.
+
+

@@ -2,6 +2,7 @@ project:
   type: manuscript
 
 draft: true
+bibliography: SSID_IVR_STUDY.bib
 
 manuscript:
   article: manuscript.qmd
@@ -33,6 +34,7 @@ format:
     latex-clean: true
     keep-tex: false
     echo: false
+    cite-method: biblatex
     hyperrefoptions: 
       - "citecolor=black"
     journal:

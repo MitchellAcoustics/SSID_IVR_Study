@@ -1,26 +1,52 @@
 ---
-title: La Palma Earthquakes
+title: A Brand New Title, Very Natural Saying Visual Perception Drives Soundscape Perception By A Lot
 author:
-  - name: Steve Purves
-    orcid: 0000-0002-0760-5497
+  - name: Tin Oberman
+    orcid: 0000-0002-0014-0383
     corresponding: true
-    email: steve@curvenote.com
+    email: t.oberman@ucl.ac.uk
     roles:
       - Investigation
       - Project administration
-      - Software
       - Visualization
+      - Writing
+      - Experimental design
+      - Experiment setup
+      - Conducting the experiments
     affiliations:
-      - Curvenote
-  - name: Rowan Cockett
-    orcid: 0000-0002-7859-8394
+      - University College London
+  - name: Andrew Mitchell
+    orcid: 0000-0003-0978-5046
     corresponding: false
-    roles: []
+    roles:
+     - Statistical analysis
+     - Coding
+     - Experimental design
     affiliations:
-      - Curvenote
+      - University College London
+  - name: Francesco Aletta
+    orcid: 0000-0003-0351-3189
+    corresponding: false
+    roles:
+     - Experimental design
+     - Revisions
+    affiliations:
+     - University College London
+  - name: Jian Kang
+    orcid: 0000-0001-8995-5636
+    corresponding: false
+    roles:
+     - Experimental design
+     - Project administration
+     - Securing funding
+    affiliations: 
+     - University College London
 keywords:
   - La Palma
   - Earthquakes
+  - Soundscape
+  - Immersive Virtual Reality
+  - Eye Tracking
 abstract: |
   In September 2021, a significant jump in seismic activity on the island of La Palma (Canary Islands, Spain) signaled the start of a volcanic crisis that still continues at the time of writing. Earthquake data is continually collected and published by the Instituto Geográphico Nacional (IGN). ...
 plain-language-summary: |
@@ -29,41 +55,17 @@ key-points:
   - A web scraping script was developed to pull data from the Instituto Geogràphico Nacional into a machine-readable form for analysis
   - Earthquake events on La Palma are consistent with the presence of both mantle and crustal reservoirs.
 date: last-modified
-bibliography: references.bib
 citation:
   container-title: Earth and Space Science
 number-sections: true
-jupyter: python3
 ---
 
-## Introduction
+# Introduction
 
-```{python}
-import matplotlib.pyplot as plt
-import numpy as np
-eruptions = [1492, 1585, 1646, 1677, 1712, 1949, 1971, 2021]
-```
 
-```{python}
-#| label: fig-timeline
-#| fig-cap: Timeline of recent earthquakes on La Palma
-#| fig-alt: An event plot of the years of the last 8 eruptions on La Palma.
+Making a change here.
 
-plt.figure(figsize=(6, 1))
-plt.eventplot(eruptions, lineoffsets=0, linelengths=0.1, color='black')
-plt.gca().axes.get_yaxis().set_visible(False)
-plt.ylabel('')
-plt.show()
-```
-
-```{python}
-#| output: false
-
-avg_years_between_eruptions = np.mean(np.diff(eruptions[:-1]))
-avg_years_between_eruptions
-```
-
-Based on data up to and including 1971, eruptions on La Palma happen every `{python} f"{avg_years_between_eruptions:.1f}"` years on average.
+Based on data up to and including 1971 @Mitchell2022How, eruptions on La Palma happen every  years on average.
 
 Studies of the magma systems feeding the volcano, such as @marrero2019, have proposed that there are two main magma reservoirs feeding the Cumbre Vieja volcano; one in the mantle (30-40km depth) which charges and in turn feeds a shallower crustal reservoir (10-20km depth).
 
@@ -102,11 +104,79 @@ La Palma is one of the west most islands in the Volcanic Archipelago of the Cana
 
 @fig-spatial-plot shows the location of recent Earthquakes on La Palma.
 
+# Results
+## Perception
+
+The preliminary results reveal a good coverage of the two-dimensional perceptual circumplex space and significant differences between perceptual outcomes driven by sound and those driven by visual stimuli. The perceptual outcomes in the two-dimensional circumplex space were calculated from the eight scales, relying on the recommendations outlined in the ISO/TS 12913-3(13) and visualised in the Figure 2 using the Soundscapy tool (8)
+
+## Behaviour
+## Effect of visual context
+# Discussion
+# Data & Methods {#sec-data-methods}
+## Ethical statement
+## Participants
+## Task
+
+The experiment consisted of three blocks within which the 27 stimuli were presented in random order, including a neutral grey environment without any sounds being reproduced which represented the baseline scenario. First block featured only auditory stimuli with a neutral grey environment presented in the HMD, the second block featured only 15s long video samples similar to (12), while the third block featured both audio and visual recordings combined. The participants were advised to take frequent breaks, one within each block but more were allowed upon request.
+
+## Laboratory setup
+
+The experiment was conducted in a listening chamber featuring twelve coaxial active speakers (Genelec 8331) arranged to provide Second Order Ambisonic playback, while the visual stimuli were delivered via an Immersive Virtual Reality (IVR) Head-Mounted Display (HMD), as shown in Figure 1. The participant was required to be sitting on a highchair with their head in a “sweet spot” – as close as possible to the point that is equally distant from the centre of all the twelve speakers.
+
+The questionnaire was deployed within the IVR simulation created in Unity and operated by a participant via joystick.
+
+## Pilot experiment
+
+Two pilot experiments were conducted: 1) Investigating the applicability of the Method A questionnaire to assess the perceived affective quality of the video scenes without the audio stimuli (12); 2) Optimising the stimuli selection to cover the full circumplex model associated with the eight dimensions employed in the Method A.
+
+The first pilot experiment featured 39 different scenes and revealed a good coverage of the calm and eventful space. The annoying and uneventful dimensions were not covered which could mean that either visual context cannot generate a monotonous outcome in an urban space, or that the dataset is missing more stimuli that would address that segment of the circumplex space (12).
+
+This led to further twelve field recordings made specifically to target the annoying, monotonous and uneventful area of the circumplex model.
+
+### Stimuli selection
+
+The second pilot study was focused on providing three scenes per each section of the circumplex space in a three by three matrix. Three researchers conducted independent assessments of the 51 videos (the combined audio and video condition) to select the most representative 27 stimuli. After the independent assessment, the outcome was discussed until an agreement was reached. The selected scenes are presented in Table 1.
+
+## Main experiment
 ## Data & Methods {#sec-data-methods}
 
-## Conclusion
+### Video Processing
+The method for video processing involves a systematic approach to process video frames, overlay gaze coordinates, and output processed videos. The following steps were undertaken:
 
-## References {.unnumbered}
+1. Participant Data Preparation
+The eyetracking data for participants, including timestamps, gaze coordinates and annotations for menu, was collected and stored by iMotion in CSV files. The timestamps is in milliseconds, while the gaze coordinates (Gaze X, Gaze Y) are measured from the top-left corner of the video frame.
+
+2. Video Format Conversion
+The input videos were checked to ensure compatibility with processing tools. Videos in non-MP4 formats, such as WMV, were converted to MP4 to ensure consistency and avoid compatibility issues.
+
+3. Chopping Video
+The `chopping_video` function was utilized to process and delete the video frames with menus. The process included:
+    - Reading video metadata (e.g., FPS and total number of frames).
+    - Iteratively reading and processing the video frames and chopping the frames with annotation.
+    - Saving the resulting videos to a specified MP4 output path.
+
+
+4. Overlaying Gaze Data
+The `overlaying_video` function was used to annotate the video with gaze data. The process included:
+    - Reading the input video and gaze data (Gaze X, Gaze Y).
+    - Iterating through each frame, determining the current timestamp, and matching it with the corresponding gaze coordinates.
+    - Drawing gaze annotations with colored circles on the video frames based on the gaze coordinates.
+
+
+#### Implementation
+The entire process was implemented in Python using pandas for handling eyetracking data, the OpenCV library for video processin and ffmpeg for video format conversion The workflow ensured that all steps were reproducible and adaptable to different datasets in csv format.
+
+
+
+## Concluding
+
+Adding some new lines of text to test collaboration. And more comments
+
+# References {.unnumbered}
 
 ::: {#refs}
 :::
+
+# Acknowledgements
+
+This research was funded through the European Research Council (ERC) Advanced Grant (no.740696) on “Soundscape Indices” (SSID). We want to thank Ms Xinrui Xu, Mr Daniel Perski and Ms Hui-Zhong Zhang for their support with data collection and experimental setup.

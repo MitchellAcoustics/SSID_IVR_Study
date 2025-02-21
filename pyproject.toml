@@ -5,8 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "av>=14.0.1",
     "cityseg",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.9.2",
+    "numpy>=2.0.2",
 ]
 
 [tool.uv.sources]
 cityseg = { git = "https://github.com/MitchellAcoustics/cityseg" }
+
+[dependency-groups]
+dev = []
