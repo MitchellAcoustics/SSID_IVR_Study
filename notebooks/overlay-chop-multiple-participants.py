@@ -35,12 +35,12 @@ logging.basicConfig(
 # Participants to process
 PARTICIPANTS = ["P48", "P42"]
 # Number of frames to process
-N_FRAMES_PROC = 30 * 120  # 30 fps * 120 seconds
+N_FRAMES_PROC = None #  fps * seconds or None
 
 # Directory
 local_data_dir = Path.cwd().parent / "data"
 server_data_dir = Path("/Volumes/ritd-ag-project-rd01wq-tober63/SSID IVR Study 1/")
-output_dir = local_data_dir.joinpath("output/2025-02-10-test/")
+output_dir = local_data_dir.joinpath("output/2025-02-26-test/")
 
 # Check if the server data directory exists
 assert server_data_dir.is_dir(), "Server data directory not found"
@@ -74,13 +74,21 @@ for PARTICIPANT_ID in PARTICIPANTS:
     # Adjust timestamp to start from 0
     points["Timestamp"] = points["Timestamp"] - timestamp_diff
 
-    # Convert WMV to MP4
+    # Convert WMV to MP4 fixedfps
     fixedfps_result = convert_wmv_to_mp4(
         part_wmv_path,
         output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4"),
         output_fps=30,
     )
     fixedfps_result.print_status()
+
+    # Convert WMV to MP4 variablefps
+    variablefps_result = convert_wmv_to_mp4(
+    part_wmv_path,
+    output_dir.joinpath(f"output_{PARTICIPANT_ID}_variablefps.mp4"),
+    output_fps=None,
+    )
+    variablefps_result.print_status()
 
     # Paths
     input_video_path = output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4")
