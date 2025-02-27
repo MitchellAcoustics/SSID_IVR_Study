@@ -1,7 +1,3 @@
-# Yuqi to write a for loop to perform the chop and overlay video processing for multiple participants.
-# Pull together the code from `single-video-processing.ipynb`
-
-# Suggest running this with: `caffeinate -i uv run overlay-chop-multiple-participants.py`
 
 """
 Video Processing for Eye Tracking Analysis
@@ -37,14 +33,14 @@ logging.basicConfig(
 )
 
 # Participants to process
-PARTICIPANTS = ["P48", "P42"]
+PARTICIPANTS = ["P6"]
 # Number of frames to process
-N_FRAMES_PROC = 30 * 120  # 30 fps * 120 seconds
+N_FRAMES_PROC = None #  fps * seconds or None
 
 # Directory
 local_data_dir = Path.cwd().parent / "data"
 server_data_dir = Path("/Volumes/ritd-ag-project-rd01wq-tober63/SSID IVR Study 1/")
-output_dir = local_data_dir.joinpath("output/2025-02-10-test/")
+output_dir = local_data_dir.joinpath("output/2025-02-27-test/")
 
 # Check if the server data directory exists
 assert server_data_dir.is_dir(), "Server data directory not found"
@@ -64,11 +60,13 @@ for PARTICIPANT_ID in PARTICIPANTS:
     print(f"Participant CSV: {part_csv_path}")
     print(f"Participant WMV: {part_wmv_path}")
 
-    # Import csv file for participant
-    needed_columns = ["Timestamp", "SlideEvent", "Gaze X", "Gaze Y", "Respondent Annotations active"]
-    points = pd.read_csv(part_csv_path, skiprows=lambda x: x < 26, usecols=needed_columns, engine="c")
+    # find the row number of #Data
+    points = pd.read_csv(part_csv_path, usecols=[0], engine="c")
+    row_index = points[points.iloc[:, 0] == "#DATA"].index[0]
 
-    # Find the "StartMedia" timestamp
+    needed_columns = ["Timestamp", "SlideEvent", "Gaze X", "Gaze Y", "Respondent Annotations active"]
+    points = pd.read_csv(part_csv_path, skiprows=lambda x: x < row_index+2, usecols=needed_columns, engine="c")
+    # find the "StartMedia" timestamp
     row = points[points["SlideEvent"] == "StartMedia"]
     timestamp_diff = row["Timestamp"].values[0]
 
@@ -78,13 +76,21 @@ for PARTICIPANT_ID in PARTICIPANTS:
     # Adjust timestamp to start from 0
     points["Timestamp"] = points["Timestamp"] - timestamp_diff
 
-    # Convert WMV to MP4
+    # Convert WMV to MP4 fixedfps
     fixedfps_result = convert_wmv_to_mp4(
         part_wmv_path,
         output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4"),
         output_fps=30,
     )
     fixedfps_result.print_status()
+
+    # Convert WMV to MP4 variablefps
+    variablefps_result = convert_wmv_to_mp4(
+    part_wmv_path,
+    output_dir.joinpath(f"output_{PARTICIPANT_ID}_variablefps.mp4"),
+    output_fps=None,
+    )
+    variablefps_result.print_status()
 
     # Paths
     input_video_path = output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4")
@@ -99,3 +105,5 @@ for PARTICIPANT_ID in PARTICIPANTS:
         points, 
         N_FRAMES_PROC
     )
+
+# %%
