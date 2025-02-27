@@ -33,14 +33,14 @@ logging.basicConfig(
 )
 
 # Participants to process
-PARTICIPANTS = ["P48", "P42"]
+PARTICIPANTS = ["P6"]
 # Number of frames to process
 N_FRAMES_PROC = None #  fps * seconds or None
 
 # Directory
 local_data_dir = Path.cwd().parent / "data"
 server_data_dir = Path("/Volumes/ritd-ag-project-rd01wq-tober63/SSID IVR Study 1/")
-output_dir = local_data_dir.joinpath("output/2025-02-26-test/")
+output_dir = local_data_dir.joinpath("output/2025-02-27-test/")
 
 # Check if the server data directory exists
 assert server_data_dir.is_dir(), "Server data directory not found"
@@ -60,11 +60,13 @@ for PARTICIPANT_ID in PARTICIPANTS:
     print(f"Participant CSV: {part_csv_path}")
     print(f"Participant WMV: {part_wmv_path}")
 
-    # Import csv file for participant
-    needed_columns = ["Timestamp", "SlideEvent", "Gaze X", "Gaze Y", "Respondent Annotations active"]
-    points = pd.read_csv(part_csv_path, skiprows=lambda x: x < 26, usecols=needed_columns, engine="c")
+    # find the row number of #Data
+    points = pd.read_csv(part_csv_path, usecols=[0], engine="c")
+    row_index = points[points.iloc[:, 0] == "#DATA"].index[0]
 
-    # Find the "StartMedia" timestamp
+    needed_columns = ["Timestamp", "SlideEvent", "Gaze X", "Gaze Y", "Respondent Annotations active"]
+    points = pd.read_csv(part_csv_path, skiprows=lambda x: x < row_index+2, usecols=needed_columns, engine="c")
+    # find the "StartMedia" timestamp
     row = points[points["SlideEvent"] == "StartMedia"]
     timestamp_diff = row["Timestamp"].values[0]
 
@@ -103,3 +105,5 @@ for PARTICIPANT_ID in PARTICIPANTS:
         points, 
         N_FRAMES_PROC
     )
+
+# %%
