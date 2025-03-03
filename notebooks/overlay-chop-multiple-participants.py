@@ -1,7 +1,3 @@
-# Yuqi to write a for loop to perform the chop and overlay video processing for multiple participants.
-# Pull together the code from `single-video-processing.ipynb`
-
-# Suggest running this with: `caffeinate -i uv run overlay-chop-multiple-participants.py`
 
 """
 Video Processing for Eye Tracking Analysis
@@ -18,6 +14,7 @@ Key Functions:
 
 # %% Import Libraries and Configure Logging
 import pandas as pd
+import numpy as np
 import cv2
 from pathlib import Path
 from typing import Tuple
@@ -37,14 +34,14 @@ logging.basicConfig(
 )
 
 # Participants to process
-PARTICIPANTS = ["P48", "P42"]
+PARTICIPANTS = ["P4", "P7","P43"]
 # Number of frames to process
-N_FRAMES_PROC = 30 * 120  # 30 fps * 120 seconds
+N_FRAMES_PROC = None #  fps * seconds or None
 
 # Directory
 local_data_dir = Path.cwd().parent / "data"
 server_data_dir = Path("/Volumes/ritd-ag-project-rd01wq-tober63/SSID IVR Study 1/")
-output_dir = local_data_dir.joinpath("output/2025-02-10-test/")
+output_dir = local_data_dir.joinpath("output/2025-03-03-test/")
 
 # Check if the server data directory exists
 assert server_data_dir.is_dir(), "Server data directory not found"
@@ -64,13 +61,24 @@ for PARTICIPANT_ID in PARTICIPANTS:
     print(f"Participant CSV: {part_csv_path}")
     print(f"Participant WMV: {part_wmv_path}")
 
-    # Import csv file for participant
-    needed_columns = ["Timestamp", "SlideEvent", "Gaze X", "Gaze Y", "Respondent Annotations active"]
-    points = pd.read_csv(part_csv_path, skiprows=lambda x: x < 26, usecols=needed_columns, engine="c")
+    # find the row number of #Data
+    points = pd.read_csv(part_csv_path, usecols=[0], engine="c")
+    row_index = points[points.iloc[:, 0] == "#DATA"].index[0]
 
-    # Find the "StartMedia" timestamp
+    points = pd.read_csv(part_csv_path, skiprows=lambda x: x < row_index+2, engine="c")
+    
+    # find the "StartMedia" timestamp
     row = points[points["SlideEvent"] == "StartMedia"]
     timestamp_diff = row["Timestamp"].values[0]
+     
+    clean = ['ET_GazeLeftx', 'ET_GazeRightx', 'ET_GazeLefty', 'ET_GazeRighty']
+    points[clean] = points[clean].replace(-1, np.nan)
+    # check if the file does not have Gaze X and Gaze Y columns, if not calculate it with ET_Gaze columns
+    if 'Gaze X' not in points.columns:
+        points['Gaze X'] = points[['ET_GazeLeftx', 'ET_GazeRightx']].mean(axis=1)
+
+    if 'Gaze Y' not in points.columns:
+        points['Gaze Y'] = points[['ET_GazeLefty', 'ET_GazeRighty']].mean(axis=1)
 
     # Clean the NaN in columns
     points = points.dropna(subset=["Gaze X", "Gaze Y"])
@@ -78,13 +86,14 @@ for PARTICIPANT_ID in PARTICIPANTS:
     # Adjust timestamp to start from 0
     points["Timestamp"] = points["Timestamp"] - timestamp_diff
 
-    # Convert WMV to MP4
+    # Convert WMV to MP4 fixedfps
     fixedfps_result = convert_wmv_to_mp4(
         part_wmv_path,
         output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4"),
         output_fps=30,
     )
     fixedfps_result.print_status()
+
 
     # Paths
     input_video_path = output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4")
@@ -99,3 +108,5 @@ for PARTICIPANT_ID in PARTICIPANTS:
         points, 
         N_FRAMES_PROC
     )
+
+# %%
