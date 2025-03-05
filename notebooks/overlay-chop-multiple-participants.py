@@ -89,16 +89,16 @@ for PARTICIPANT_ID in PARTICIPANTS:
     # Convert WMV to MP4 fixedfps
     fixedfps_result = convert_wmv_to_mp4(
         part_wmv_path,
-        output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4"),
+        output_dir.joinpath(f"{PARTICIPANT_ID}_fixedfps.mp4"),
         output_fps=30,
     )
     fixedfps_result.print_status()
 
 
     # Paths
-    input_video_path = output_dir.joinpath(f"output_{PARTICIPANT_ID}_fixedfps.mp4")
-    output_chopping_path = output_dir.joinpath(f"output_chopped_{PARTICIPANT_ID}_fixedfps.mp4")
-    output_overlay_path = output_dir.joinpath(f"output_overlay_{PARTICIPANT_ID}_fixedfps.mp4")
+    input_video_path = output_dir.joinpath(f"{PARTICIPANT_ID}_fixedfps.mp4")
+    output_chopping_path = output_dir.joinpath(f"{PARTICIPANT_ID}_chopped_fixedfps.mp4")
+    output_overlay_path = output_dir.joinpath(f"{PARTICIPANT_ID}_overlay_fixedfps.mp4")
 
     # Process video with chopping and gaze overlay
     process_video(
