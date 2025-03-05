@@ -34,7 +34,7 @@ logging.basicConfig(
 )
 
 # Participants to process
-PARTICIPANTS = ["P4", "P7","P43"]
+PARTICIPANTS = ["P4"]
 # Number of frames to process
 N_FRAMES_PROC = None #  fps * seconds or None
 
