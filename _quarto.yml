@@ -17,6 +17,18 @@ notebook-links: global
 execute:
   freeze: auto
 
+affiliations:
+  - id: ucl-iede
+    name: University College London
+    department: Institute for Environmental Design \& Engineering
+    city: London
+    country: United Kingdom
+  - id: ucl-bssc
+    name: University College London
+    department: The Bartlett School of Sustainable Construction
+    city: London
+    country: United Kingdom
+
 format:
   html:
     toc: true
@@ -27,9 +39,7 @@ format:
       dark: superhero
     smooth-scroll: true
 
-  docx: default
   jats: default
-  
   elsevier-pdf:
     latex-clean: true
     keep-tex: false
