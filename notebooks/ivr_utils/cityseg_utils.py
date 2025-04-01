@@ -68,6 +68,42 @@ class CitySegData:
             np.ndarray: Segmentation mask.
         """
         return self.hdf_file["segmentation"][()]
+    
+    def match_gaze_with_masks(
+        self, 
+        gaze_data: np.ndarray,      
+        output_path: Path = None
+    ) -> np.ndarray:
+        """
+        Matches gaze data with segmentation masks.
+
+        Returns: 
+            [frame index, x, y, class_id]
+        """
+        seg_masks = self.get_segmentation_mask()
+        num_frames, H, W = seg_masks.shape
+
+        results = []
+        for entry in gaze_data:
+            frame_index, x, y = entry
+            x = int(x)
+            y = int(y)
+            frame_index = int(frame_index)
+
+            valid = (
+                0 <= frame_index < num_frames and
+                0 <= x < W and
+                0 <= y < H
+            )
+            class_id = seg_masks[frame_index, y, x] if valid else -1
+            results.append([frame_index, x, y, class_id])
+    
+        result_array = np.array(results, dtype=np.int32)
+    
+        if output_path:
+            np.save(output_path, result_array)
+    
+        return result_array
 
 
 # %%
