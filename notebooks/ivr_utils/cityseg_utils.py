@@ -78,14 +78,14 @@ class CitySegData:
         Matches gaze data with segmentation masks.
 
         Returns: 
-            [frame index, x, y, class_id]
+            [frame_index, x, y, scence_id ,class_id]
         """
         seg_masks = self.get_segmentation_mask()
         num_frames, H, W = seg_masks.shape
 
         results = []
         for entry in gaze_data:
-            frame_index, x, y = entry
+            frame_index, x, y , scence_id = entry
             x = int(x)
             y = int(y)
             frame_index = int(frame_index)
@@ -96,15 +96,53 @@ class CitySegData:
                 0 <= y < H
             )
             class_id = seg_masks[frame_index, y, x] if valid else -1
-            results.append([frame_index, x, y, class_id])
-    
-        result_array = np.array(results, dtype=np.int32)
-    
+            results.append([frame_index, x, y, scence_id, class_id])
+            result_array = np.array(results, dtype=object)
+       
         if output_path:
             np.save(output_path, result_array)
     
         return result_array
 
+    def calculate_percentage_of_mask(self, gaze_data: np.ndarray) -> np.ndarray:
+        """
+        Calculate the percentage of the class id for each scene.
+
+        Returns:
+            Percentage of the class id for each scene for each participant.
+        """
+        matched_data = self.match_gaze_with_masks(gaze_data, None)
+        
+        scene_dict = {}
+        for row in matched_data:
+            scene_id = row[3]
+            class_id = row[4]
+            if scene_id not in scene_dict:
+                scene_dict[scene_id] = {"total": 0, "counts": {}}
+            scene_dict[scene_id]["total"] += 1
+            scene_dict[scene_id]["counts"][class_id] = scene_dict[scene_id]["counts"].get(class_id, 0) + 1
+
+        
+        output_lines = []  
+        for scene_id, data in scene_dict.items():
+            total = data["total"]
+            for cid in range(1, 19):  
+                count = data["counts"].get(cid, 0)
+                percentage = (count / total) * 100 if total > 0 else 0
+               
+                line = f"{scene_id}  {cid}  {percentage:.0f}%"
+                output_lines.append(line)
+     
+        for line in output_lines:
+            print(line)
+
+        return np.array(output_lines, dtype=object)
+
+    
+        
+
+
+        
 
 # %%
 # Usage:

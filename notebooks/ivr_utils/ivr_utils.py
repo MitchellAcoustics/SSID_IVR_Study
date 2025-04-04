@@ -426,7 +426,7 @@ def process_video(
                 cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
                 out_gazeoverlay.write(frame)
   
-            gaze_data.append([chopped_frame_index, x, y])
+            gaze_data.append([chopped_frame_index, x, y, points["Respondent Annotations active"].iloc[current_point_index]])
             chopped_frame_index += 1 
 
     gaze_npy_path = output_chopped_path.with_suffix(".npy")
