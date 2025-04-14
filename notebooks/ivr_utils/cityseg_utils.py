@@ -78,14 +78,14 @@ class CitySegData:
         Matches gaze data with segmentation masks.
 
         Returns: 
-            [frame_index, x, y, scence_id ,class_id]
+            [frame_index, x, y, session id ,class_id]
         """
         seg_masks = self.get_segmentation_mask()
         num_frames, H, W = seg_masks.shape
 
         results = []
         for entry in gaze_data:
-            frame_index, x, y , scence_id = entry
+            frame_index, x, y , session_id = entry
             x = int(x)
             y = int(y)
             frame_index = int(frame_index)
@@ -96,7 +96,7 @@ class CitySegData:
                 0 <= y < H
             )
             class_id = seg_masks[frame_index, y, x] if valid else -1
-            results.append([frame_index, x, y, scence_id, class_id])
+            results.append([frame_index, x, y, session_id, class_id])
             result_array = np.array(results, dtype=object)
        
         if output_path:
@@ -113,31 +113,66 @@ class CitySegData:
         """
         matched_data = self.match_gaze_with_masks(gaze_data, None)
         
+        # session id scene mapping
+        session_scene_mapping = {
+            'MiradorSanNicolas1': '0QUE',
+            'BidderSt2': '1V',
+            'BidderSt1': '28V',
+            'BlairSt1': '22V',
+            'BlundellSt1': '24V',
+            'CaledonianPark1': '26V',
+            'CamdenTown4': '2V',
+            'CarloV2': '16V',
+            'DadongSq3': '25V',
+            'EustonTap3': '15V',
+            'HereEspresso1': '7V',
+            'IvesRd2': '17V',
+            'KingsfordRow1': '21V',
+            'LianhuashanParkEntrance1': '27V',
+            'MarchmontGardens4': '23V',
+            'NewRiverWalk1': '3V',
+            'OlympicSq3': '19V',
+            'PancrasLock2': '20V',
+            'PingshanSt1': '6V',
+            'PlazaBibRambla1': '5V',
+            'RegentsParkFields2': '13V',
+            'RegentsParkJapan2': '8V',
+            'RiverLeeSchools1b': '9V',
+            'SanMarco1': '11V',
+            'StephensonSt1': '10V',
+            'TateModern3': '4V',
+            'TorringtonSq4': '12V',
+            'WineOfficeCt1': '14V',
+            'ZhongshanPark5': '18V',
+            'Blank': '29V'
+        }
+
         scene_dict = {}
         for row in matched_data:
-            scene_id = row[3]
+            session_id = row[3]
             class_id = row[4]
-            if scene_id not in scene_dict:
-                scene_dict[scene_id] = {"total": 0, "counts": {}}
-            scene_dict[scene_id]["total"] += 1
-            scene_dict[scene_id]["counts"][class_id] = scene_dict[scene_id]["counts"].get(class_id, 0) + 1
+            if session_id not in scene_dict:
+                scene_dict[session_id] = {"total": 0, "counts": {}}
+            scene_dict[session_id]["total"] += 1
+            scene_dict[session_id]["counts"][class_id] = scene_dict[session_id]["counts"].get(class_id, 0) + 1
 
         
         output_lines = []  
-        for scene_id, data in scene_dict.items():
+        for session_id, data in scene_dict.items():
             total = data["total"]
+            scene_id = session_scene_mapping.get(session_id, 'Unknown') 
             for cid in range(1, 19):  
                 count = data["counts"].get(cid, 0)
                 percentage = (count / total) * 100 if total > 0 else 0
-               
-                line = f"{scene_id}  {cid}  {percentage:.0f}%"
+                line = f"{scene_id} {session_id} {cid} {percentage:.0f}%"
                 output_lines.append(line)
      
         for line in output_lines:
             print(line)
 
         return np.array(output_lines, dtype=object)
-
+    
+  
     
         
 
