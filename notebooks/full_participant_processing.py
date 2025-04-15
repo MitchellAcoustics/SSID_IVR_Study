@@ -3,8 +3,8 @@
 import pandas as pd
 from pathlib import Path
 from ivr_utils.ivr_utils import (
-    find_participant_files,
-    convert_wmv_to_mp4,
+    participant_file_paths,
+    mp4_conversion,
     process_video,
 )
 import numpy as np
@@ -34,7 +34,7 @@ def process_participant(
     eyetracking_dir, output_dir = _check_dirs(eyetracking_dir, output_dir)
 
     # Find participant files
-    part_csv_path, part_wmv_path = find_participant_files(
+    part_csv_path, part_wmv_path = participant_file_paths(
         participant_id, eyetracking_dir
     )
 
@@ -49,7 +49,7 @@ def process_participant(
     else:
         logging.info(f"Converting WMV to MP4: {mp4_path}")
         # Convert WMV to MP4 with fixed FPS
-        mp4_result = convert_wmv_to_mp4(part_wmv_path, mp4_path, output_fps=30)
+        mp4_result = mp4_conversion(part_wmv_path, mp4_path, output_fps=30)
         logging.info(f"Converted MP4: {mp4_path}")
 
     # Chopping and Overlaying Gaze point

@@ -15,10 +15,6 @@ Requirements:
     - ffmpeg with videotoolbox support
     - Python 3.9+
     - macOS with Apple Silicon (for hardware acceleration)
-
-Example:
-    >>> from ivr_utils import find_participant_files
-    >>> csv_path, video_path = find_participant_files("P001", "data/")
 """
 
 from dataclasses import dataclass
@@ -34,12 +30,15 @@ import pandas as pd
 from tqdm.auto import tqdm, trange
 import numpy as np
 
+from hamilton.function_modifiers import datasaver
+from hamilton.io import utils
+
 logger = logging.getLogger(__name__)
 
 
-def find_participant_files(
-    participant_id: str, data_dir: Path | str
-) -> tuple[Path, Path]:
+def participant_file_paths(
+    participant_id: str, eyetracking_dir: Path | str
+) -> tuple[str, str]:
     """
     Find the participant files for the given participant ID in the given data directory.
 
@@ -60,7 +59,7 @@ def find_participant_files(
     Raises:
     - AssertionError: If the CSV file or the WMV video file is not found or if multiple files are found.
     """
-    data_dir = Path(data_dir) if isinstance(data_dir, str) else data_dir
+    data_dir = _ensure_path(eyetracking_dir)
 
     # Find eyetracking csv
     part_csv_l = list(data_dir.rglob(f"*{participant_id}.csv"))
@@ -77,7 +76,41 @@ def find_participant_files(
     part_vid_path = part_vid_l[0]
     part_vid_path = part_vid_path.resolve()
 
-    return part_csv_path, part_vid_path
+    return part_csv_path.as_posix(), part_vid_path.as_posix()
+
+
+def participant_points(participant_file_paths: tuple[str, str]) -> pd.DataFrame:
+    part_csv_path, _ = participant_file_paths
+    part_csv_path = _ensure_path(part_csv_path)
+
+    points = pd.read_csv(part_csv_path, usecols=[0], engine="c")
+    row_index = points[points.iloc[:, 0] == "#DATA"].index[0]
+
+    points = pd.read_csv(
+        part_csv_path, skiprows=lambda x: x < row_index + 2, engine="c"
+    )
+
+    # find the "StartMedia" timestamp
+    row = points[points["SlideEvent"] == "StartMedia"]
+    timestamp_diff = row["Timestamp"].values[0]
+
+    clean = ["ET_GazeLeftx", "ET_GazeRightx", "ET_GazeLefty", "ET_GazeRighty"]
+    points[clean] = points[clean].replace(-1, np.nan)
+
+    # check if the file does not have Gaze X and Gaze Y columns, if not calculate it with ET_Gaze columns
+    if "Gaze X" not in points.columns:
+        points["Gaze X"] = points[["ET_GazeLeftx", "ET_GazeRightx"]].mean(axis=1)
+
+    if "Gaze Y" not in points.columns:
+        points["Gaze Y"] = points[["ET_GazeLefty", "ET_GazeRighty"]].mean(axis=1)
+
+    # Clean the NaN in columns
+    points = points.dropna(subset=["Gaze X", "Gaze Y"])
+
+    # Adjust timestamp to start from 0
+    points["Timestamp"] = points["Timestamp"] - timestamp_diff
+
+    return points
 
 
 class ConversionStatus(Enum):
@@ -97,8 +130,12 @@ class ConversionStatus(Enum):
 @dataclass
 class ConversionResult:
     status: ConversionStatus
-    output_path: Path
-    error_message: Optional[str] = None
+    output_str: str
+    error_message: str | None = None
+
+    @property
+    def output_path(self) -> Path:
+        return _ensure_path(self.output_str)
 
     def print_status(self):
         if self.status == ConversionStatus.SUCCESS:
@@ -116,7 +153,7 @@ class VideoInfo:
     duration: float
 
 
-def _ensure_path(path: Union[str, Path]) -> Path:
+def _ensure_path(path: str | Path) -> Path:
     return Path(path) if isinstance(path, str) else path
 
 
@@ -170,10 +207,11 @@ def _validate_video(
     return True, None
 
 
-def convert_wmv_to_mp4(
-    input_wmv_path: Union[Path, str],
-    output_mp4_path: Optional[Union[Path, str]] = None,
-    output_fps: Optional[int] = None,
+def mp4_conversion(
+    participant_file_paths: tuple[str, str],
+    participant_id: str,
+    output_dir: str,
+    output_fps: int | None = None,
     full_validation: bool = True,
 ) -> ConversionResult:
     """Convert WMV video to MP4 format using Apple Silicon hardware acceleration.
@@ -200,12 +238,12 @@ def convert_wmv_to_mp4(
 
     Examples:
         Basic conversion:
-        >>> result = convert_wmv_to_mp4("input.wmv")
+        >>> result = mp4_conversion("input.wmv")
         >>> if result.status == ConversionStatus.SUCCESS:
         >>>     print(f"Converted to {result.output_path}")
 
         Custom output path with validation:
-        >>> result = convert_wmv_to_mp4(
+        >>> result = mp4_conversion(
         >>>     "input.wmv",
         >>>     "output/video.mp4",
         >>>     full_validation=True
@@ -219,12 +257,16 @@ def convert_wmv_to_mp4(
         - Removes audio track
         - Uses full color range
     """
+    _, input_wmv_path = participant_file_paths
     input_path = _ensure_path(input_wmv_path)
-    output_path = (
-        _ensure_path(output_mp4_path)
-        if output_mp4_path
-        else input_path.with_suffix(".mp4")
-    )
+    output_path = _ensure_path(output_dir)
+
+    output_path = output_path.joinpath(f"{participant_id}_fixedfps.mp4")
+    if output_path.exists():
+        logger.info(f"MP4 file already exists: {output_path}")
+        return ConversionResult(
+            status=ConversionStatus.ALREADY_EXISTS, output_str=output_path.as_posix()
+        )
 
     # Check existing file
     if output_path.exists():
@@ -236,7 +278,8 @@ def convert_wmv_to_mp4(
         )
         if is_valid:
             return ConversionResult(
-                status=ConversionStatus.ALREADY_EXISTS, output_path=output_path
+                status=ConversionStatus.ALREADY_EXISTS,
+                output_str=output_path.as_posix(),
             )
         logger.warning(f"Existing MP4 is invalid: {error}")
 
@@ -288,11 +331,10 @@ def convert_wmv_to_mp4(
             logger.error(f"FFMPEG Error: {result.stderr}")
             return ConversionResult(
                 status=ConversionStatus.FAILED,
-                output_path=output_path,
+                output_str=output_path.as_posix(),
                 error_message=result.stderr,
             )
-
-        if result.returncode == 0:
+        else:  # result.returncode == 0
             # Validate converted file
             is_valid, error = _validate_video(
                 output_path,
@@ -302,20 +344,50 @@ def convert_wmv_to_mp4(
             if not is_valid:
                 return ConversionResult(
                     status=ConversionStatus.FAILED,
-                    output_path=output_path,
+                    output_str=output_path.as_posix(),
                     error_message=f"Validation failed: {error}",
                 )
 
             return ConversionResult(
-                status=ConversionStatus.SUCCESS, output_path=output_path
+                status=ConversionStatus.SUCCESS,
+                output_str=output_path.as_posix(),
             )
 
     except Exception as e:
         return ConversionResult(
             status=ConversionStatus.FAILED,
-            output_path=output_path,
+            output_str=output_path.as_posix(),
             error_message=str(e),
         )
+
+
+def output_video_paths(participant_id: str, output_dir: str) -> tuple[str, str]:
+    """
+    Generate output video paths for chopping and overlaying gaze points.
+
+    Parameters:
+        participant_id (str): The ID of the participant.
+        output_dir (Path): The directory where the output files will be saved.
+
+    Returns:
+        tuple[Path, Path]: Paths for the chopped and overlay videos.
+    """
+    output_path = _ensure_path(output_dir)
+    output_chopped_path = output_path.joinpath(f"{participant_id}_chopped.mp4")
+    output_overlay_path = output_path.joinpath(f"{participant_id}_overlay.mp4")
+
+    if output_chopped_path.exists() and output_overlay_path.exists():
+        logger.info(
+            f"Chopped and overlayed video files already exist: {output_chopped_path}, {output_overlay_path}"
+        )
+    else:
+        logger.info(
+            f"Chopping and overlaying video: {output_chopped_path}, {output_overlay_path}"
+        )
+        # Create the output paths if they don't exist
+        output_path.mkdir(parents=True, exist_ok=True)
+
+    return output_chopped_path.as_posix(), output_overlay_path.as_posix()
 
 
 def pyav_timestamps(video: Path, index: int = 0) -> List[int]:
@@ -348,13 +420,17 @@ def pyav_timestamps(video: Path, index: int = 0) -> List[int]:
 
 
 def process_video(
-    input_video_path,
-    output_chopped_path,
-    output_gazeoverlay_path,
-    points,
-    n_frames_proc=None,
-):
+    mp4_conversion: ConversionResult,
+    output_video_paths: tuple[str, str],
+    participant_points: pd.DataFrame,
+    n_frames_proc: int | None = None,
+) -> np.ndarray:
+    output_chopped_path, output_gazeoverlay_path = output_video_paths
+    output_chopped_path = _ensure_path(output_chopped_path)
+    output_gazeoverlay_path = _ensure_path(output_gazeoverlay_path)
+
     # read the video
+    input_video_path = mp4_conversion.output_path
     logger.info(f"process_video - Reading video from {input_video_path}")
     video = cv2.VideoCapture(input_video_path.as_posix())
     fps = video.get(cv2.CAP_PROP_FPS)
@@ -372,7 +448,7 @@ def process_video(
         else "No output_chopped_path"
     )
     out_chopping = (
-        cv2.VideoWriter(output_chopped_path, fourcc, fps, (width, height))
+        cv2.VideoWriter(output_chopped_path.as_posix(), fourcc, fps, (width, height))
         if output_chopped_path
         else None
     )
@@ -383,7 +459,9 @@ def process_video(
         else "No output_gazeoverlay_path"
     )
     out_gazeoverlay = (
-        cv2.VideoWriter(output_gazeoverlay_path, fourcc, fps, (width, height))
+        cv2.VideoWriter(
+            output_gazeoverlay_path.as_posix(), fourcc, fps, (width, height)
+        )
         if output_gazeoverlay_path
         else None
     )
@@ -391,8 +469,8 @@ def process_video(
     current_point_index = 0
     chopped_frame_index = 0
     skip_frames = False
-    gaze_data = [] 
-    
+    gaze_data = []
+
     for frame_index in trange(n_frames_proc):
         ret, frame = video.read()
         if not ret:
@@ -401,16 +479,21 @@ def process_video(
         current_time = frame_index / fps * 1000
 
         while (
-            current_point_index < len(points) - 1
-            and points["Timestamp"].iloc[current_point_index + 1] <= current_time
+            current_point_index < len(participant_points) - 1
+            and participant_points["Timestamp"].iloc[current_point_index + 1]
+            <= current_time
         ):
             current_point_index += 1
 
             if (
                 pd.isna(
-                    points["Respondent Annotations active"].iloc[current_point_index]
+                    participant_points["Respondent Annotations active"].iloc[
+                        current_point_index
+                    ]
                 )
-                or points["Respondent Annotations active"].iloc[current_point_index]
+                or participant_points["Respondent Annotations active"].iloc[
+                    current_point_index
+                ]
                 == ""
             ):
                 skip_frames = True
@@ -422,15 +505,21 @@ def process_video(
                 out_chopping.write(frame)
 
             if output_gazeoverlay_path:
-                x, y = gaze_overlay_coords(points, current_point_index)
+                x, y = gaze_overlay_coords(participant_points, current_point_index)
                 cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
                 out_gazeoverlay.write(frame)
-  
-            gaze_data.append([chopped_frame_index, x, y, points["Respondent Annotations active"].iloc[current_point_index]])
-            chopped_frame_index += 1 
 
-    gaze_npy_path = output_chopped_path.with_suffix(".npy")
-    np.save(gaze_npy_path, np.array(gaze_data))    
+            gaze_data.append(
+                [
+                    chopped_frame_index,
+                    x,
+                    y,
+                    participant_points["Respondent Annotations active"].iloc[
+                        current_point_index
+                    ],
+                ]
+            )
+            chopped_frame_index += 1
 
     logger.debug("chopping_video - releasing resources")
 
@@ -441,7 +530,22 @@ def process_video(
         out_gazeoverlay.release()
     cv2.destroyAllWindows()
 
+    return np.array(gaze_data)
 
-def gaze_overlay_coords(points, current_point_index):
+
+@datasaver()
+def save_gaze_data(
+    process_video: np.ndarray,
+    output_video_paths: tuple[str, str],
+) -> dict:
+    """Save gaze data to a numpy file."""
+    gaze_npy_path = Path(output_video_paths[0]).with_suffix(".npy")
+    np.save(gaze_npy_path, process_video)
+    return utils.get_file_metadata(gaze_npy_path)
+
+
+def gaze_overlay_coords(
+    points: pd.DataFrame, current_point_index: int
+) -> tuple[int, int]:
     row = points.iloc[current_point_index]
     return int(row["Gaze X"]), int(row["Gaze Y"])
