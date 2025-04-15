@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
 from typing import Dict, Any, Tuple
+import pandas as pd
 
 
 def _load_hdf_file(file_path: Path) -> Tuple[h5py.File, Dict[str, Any]]:
@@ -157,27 +158,78 @@ class CitySegData:
             scene_dict[session_id]["counts"][class_id] = scene_dict[session_id]["counts"].get(class_id, 0) + 1
 
         
-        output_lines = []  
+        output_rows = []
         for session_id, data in scene_dict.items():
             total = data["total"]
-            scene_id = session_scene_mapping.get(session_id, 'Unknown') 
-            for cid in range(1, 19):  
+            scene_id = session_scene_mapping.get(session_id, 'Unknown')
+            for cid in range(1, 19):
                 count = data["counts"].get(cid, 0)
                 percentage = (count / total) * 100 if total > 0 else 0
-                line = f"{scene_id} {session_id} {cid} {percentage:.0f}%"
-                output_lines.append(line)
-     
-        for line in output_lines:
-            print(line)
+                percentage = f"{percentage:.2f}%"
+                output_rows.append([scene_id, session_id, cid, percentage])
 
-        return np.array(output_lines, dtype=object)
+        
+        result_array = np.array(output_rows, dtype=object)
+        print(result_array.shape) 
+        return result_array
+
+    
+
+    def merge_percentage_with_circumplex(self, circumplex_path: Path, percentage_data: np.array, PARTICIPANT, output_file=None) -> pd.DataFrame:
+
+        percentage_df = pd.DataFrame(
+            percentage_data,
+            columns=["SceneID", "SessionID", "ClassID", "Percentage"]
+        )
+        percentage_df["Percentage"] = percentage_df["Percentage"].str.replace("%", "").astype(float)
+
+        pivot_df = percentage_df.pivot_table(
+            index="SessionID",
+            columns="ClassID",
+            values="Percentage",
+            aggfunc="first"
+        )
+        pivot_df.columns = [f"Class{int(col)}" for col in pivot_df.columns]
+        pivot_df = pivot_df.reset_index()
+
+        av_df = pd.read_excel(circumplex_path, sheet_name="AV")
+        av_df = av_df[av_df["Participant"] == PARTICIPANT].copy()
+        av_df = av_df[['Participant', 'SessionID', 'ISOPleasant', 'ISOEventful']]
+
+        merged = pd.merge(
+            av_df,
+            pivot_df,
+            on="SessionID",
+            how="left"
+        )
+
+        class_cols = sorted(
+            [col for col in merged.columns if col.startswith("Class")],
+            key=lambda x: int(x.replace("Class", ""))
+        )
+        desired_columns = ["Participant", "SessionID", "ISOPleasant", "ISOEventful"] + class_cols
+        merged = merged[desired_columns]
+
+        if output_file is not None:
+            if output_file.lower().endswith(".csv"):
+                merged.to_csv(output_file, index=False)
+            elif output_file.lower().endswith((".xls", ".xlsx")):
+                with pd.ExcelWriter(output_file) as writer:
+                    merged.to_excel(writer, index=False)
+            else:
+                merged.to_csv(output_file, index=False)
+
+        return merged
+
+
+
+
+
     
   
-    
-        
 
 
-        
+
 
 # %%
 # Usage:
