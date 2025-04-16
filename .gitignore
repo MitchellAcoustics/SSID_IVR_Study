@@ -544,3 +544,5 @@ site_libs
 _freeze
 
 .TinyTeX
+memory-bank/
+.clinerules
