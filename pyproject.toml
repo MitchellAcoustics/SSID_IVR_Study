@@ -10,6 +10,8 @@ dependencies = [
     "jupyter>=1.1.1",
     "matplotlib>=3.9.2",
     "numpy>=2.0.2",
+    "pandas[excel]>=2.2.3",
+    "soundscapy>=0.7.8",
 ]
 
 [tool.uv.sources]

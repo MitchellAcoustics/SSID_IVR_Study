@@ -211,13 +211,15 @@ class CitySegData:
         merged = merged[desired_columns]
 
         if output_file is not None:
-            if output_file.lower().endswith(".csv"):
+            suffix = output_file.suffix.lower()
+            if suffix == ".csv":
                 merged.to_csv(output_file, index=False)
-            elif output_file.lower().endswith((".xls", ".xlsx")):
+            elif suffix in [".xls", ".xlsx"]:
                 with pd.ExcelWriter(output_file) as writer:
                     merged.to_excel(writer, index=False)
             else:
                 merged.to_csv(output_file, index=False)
+
 
         return merged
 
