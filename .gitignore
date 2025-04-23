@@ -546,3 +546,6 @@ _freeze
 .TinyTeX
 memory-bank/
 .clinerules
+data/output/
+data/outputs/
+myriad.md
