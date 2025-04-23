@@ -162,7 +162,7 @@ class CitySegData:
         for session_id, data in scene_dict.items():
             total = data["total"]
             scene_id = session_scene_mapping.get(session_id, 'Unknown')
-            for cid in range(1, 19):
+            for cid in range(0, 19):
                 count = data["counts"].get(cid, 0)
                 percentage = (count / total) * 100 if total > 0 else 0
                 percentage = f"{percentage:.2f}%"
@@ -176,26 +176,37 @@ class CitySegData:
     
 
     def merge_percentage_with_circumplex(self, circumplex_path: Path, percentage_data: np.array, PARTICIPANT, output_file=None) -> pd.DataFrame:
+        
+        # Load label IDs from metadata
+        label_ids = self.metadata.get("label_ids", {})
+        label_mapping = {int(k): v for k, v in label_ids.items()}
 
+        # Convert percentage data to DataFrame
         percentage_df = pd.DataFrame(
             percentage_data,
             columns=["SceneID", "SessionID", "ClassID", "Percentage"]
         )
         percentage_df["Percentage"] = percentage_df["Percentage"].str.replace("%", "").astype(float)
 
+        # Replace ClassID with corresponding labels
+        percentage_df["ClassLabel"] = percentage_df["ClassID"].map(label_mapping)
+
+        # Pivot the DataFrame
         pivot_df = percentage_df.pivot_table(
             index="SessionID",
-            columns="ClassID",
+            columns="ClassLabel",
             values="Percentage",
             aggfunc="first"
         )
-        pivot_df.columns = [f"Class{int(col)}" for col in pivot_df.columns]
+        pivot_df.columns = [f"{col}" for col in pivot_df.columns]
         pivot_df = pivot_df.reset_index()
 
+        # Load circumplex data
         av_df = pd.read_excel(circumplex_path, sheet_name="AV")
         av_df = av_df[av_df["Participant"] == PARTICIPANT].copy()
         av_df = av_df[['Participant', 'SessionID', 'ISOPleasant', 'ISOEventful']]
 
+        # Merge circumplex data with percentage data
         merged = pd.merge(
             av_df,
             pivot_df,
@@ -203,13 +214,14 @@ class CitySegData:
             how="left"
         )
 
+        # Reorder columns
         class_cols = sorted(
-            [col for col in merged.columns if col.startswith("Class")],
-            key=lambda x: int(x.replace("Class", ""))
+            [col for col in merged.columns if col not in ["Participant", "SessionID", "ISOPleasant", "ISOEventful"]],
         )
         desired_columns = ["Participant", "SessionID", "ISOPleasant", "ISOEventful"] + class_cols
         merged = merged[desired_columns]
 
+        # Save to output file if specified
         if output_file is not None:
             suffix = output_file.suffix.lower()
             if suffix == ".csv":
@@ -220,9 +232,7 @@ class CitySegData:
             else:
                 merged.to_csv(output_file, index=False)
 
-
         return merged
-
 
 
 
