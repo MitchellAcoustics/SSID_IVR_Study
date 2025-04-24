@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-cityseg = { git = "https://github.com/MitchellAcoustics/cityseg" }
+cityseg = { git = "https://github.com/MitchellAcoustics/cityseg", branch = "dev" }
 
 [dependency-groups]
 dev = []

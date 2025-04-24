@@ -333,8 +333,8 @@ wheels = [
 
 [[package]]
 name = "cityseg"
-version = "0.3.0"
-source = { git = "https://github.com/MitchellAcoustics/cityseg#defd1c1d33a3e512a0f4c981984f9fe5c8a64cbd" }
+version = "0.3.1.dev3"
+source = { git = "https://github.com/MitchellAcoustics/cityseg?branch=dev#54377f2b145906f5796ab91ce3d42d7541ed87d6" }
 dependencies = [
     { name = "h5py" },
     { name = "loguru" },
@@ -2398,7 +2398,7 @@ dependencies = [
 requires-dist = [
     { name = "av", specifier = ">=14.0.1" },
     { name = "circumplex", specifier = ">=0.1.4" },
-    { name = "cityseg", git = "https://github.com/MitchellAcoustics/cityseg" },
+    { name = "cityseg", git = "https://github.com/MitchellAcoustics/cityseg?branch=dev" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.9.2" },
     { name = "numpy", specifier = ">=2.0.2" },

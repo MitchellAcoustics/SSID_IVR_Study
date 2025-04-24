@@ -18,7 +18,7 @@ certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.4.0
 circumplex==0.1.4
-cityseg @ git+https://github.com/MitchellAcoustics/cityseg@defd1c1d33a3e512a0f4c981984f9fe5c8a64cbd
+cityseg @ git+https://github.com/MitchellAcoustics/cityseg@54377f2b145906f5796ab91ce3d42d7541ed87d6
 colorama==0.4.6 ; sys_platform == 'win32'
 comm==0.2.2
 contourpy==1.3.1
