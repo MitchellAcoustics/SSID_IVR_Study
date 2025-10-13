@@ -1,6 +1,6 @@
 # Input configuration
-input: "/Users/yuqiliang/Documents/Github/data/output/P48-test/P48_chopped_fixedfps_3scenes.mp4"
-output_dir: "/Users/yuqiliang/Documents/Github/data/cityseg_test/test-P48-step1-3scenes"
+input: "/Users/yuqiliang/Documents/Github/data/output/P48-test/P48_chopped_fixedfps_5scenes.mp4"
+output_dir: "/Users/yuqiliang/Documents/Github/data/cityseg_test/test-P48-step1-5scenes"
 #output_prefix: "segmentation_result"
 ignore_files: null # Optional: list of file names to ignore
 
@@ -9,7 +9,7 @@ model:
   name: "facebook/mask2former-swin-large-cityscapes-semantic"
   model_type: null # Optional: can be 'beit', 'mask2former', or null for auto-detection
   max_size: null # Optional: maximum size for input images/frames
-  device: "mps" # Options: "cuda", "cpu", "mps", or null for auto-detection
+  device: "cuda" # Options: "cuda", "cpu", "mps", or null for auto-detection
   dataset: "semantic-sidewalk" # Optional: dataset name for model-specific postprocessing
   num_workers: 0 # Number of workers for data loading
   pipe_batch: 5 # Number of frames to process in each batch. Recommend setting this equal to batch_size below.
