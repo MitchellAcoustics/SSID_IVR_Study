@@ -1,36 +1,23 @@
-# Input configuration
-input: "/Users/yuqiliang/Documents/Github/data/output/P48-test/P48_chopped_fixedfps_5scenes.mp4"
-output_dir: "/Users/yuqiliang/Documents/Github/data/cityseg_test/test-P48-step1-5scenes"
-#output_prefix: "segmentation_result"
-ignore_files: null # Optional: list of file names to ignore
-
-# Model configuration
+input: /Users/yuqiliang/Documents/Github/data/video_processing/P48/P48_chopped_fixedfps.mp4
+output_dir: /Users/yuqiliang/Documents/Github/data/citgyseg_test/autoresume_test_05/P48
+ignore_files: null
 model:
-  name: "facebook/mask2former-swin-large-cityscapes-semantic"
-  model_type: null # Optional: can be 'beit', 'mask2former', or null for auto-detection
-  max_size: null # Optional: maximum size for input images/frames
-  device: "cuda" # Options: "cuda", "cpu", "mps", or null for auto-detection
-  dataset: "semantic-sidewalk" # Optional: dataset name for model-specific postprocessing
-  num_workers: 0 # Number of workers for data loading
-  pipe_batch: 5 # Number of frames to process in each batch. Recommend setting this equal to batch_size below.
-
-# Processing configuration
-frame_step: 1 # Process every 5th frame
-batch_size: 5 # Number of frames to process in each batch
-output_fps: null # Optional: FPS for output video (if different from input)
-
-# Output options
+  name: facebook/mask2former-swin-large-cityscapes-semantic
+  model_type: null
+  max_size: null
+  device: mps
+  dataset: semantic-sidewalk
+  num_workers: 0
+  pipe_batch: 10
+frame_step: 1
+batch_size: 10
+output_fps: null
 save_raw_segmentation: true
 save_colored_segmentation: true
 save_overlay: true
 analyze_results: true
-
-# Visualization configuration
 visualization:
-  alpha: 0.5 # Opacity of the segmentation overlay
-  colormap: "default" # Colormap for segmentation visualization
-
-# Advanced options
-force_reprocess: false # Set to true to reprocess even if output files exist
-disable_tqdm: true # Set to true to disable progress bars. In some cases, tqdm seems to lead to segfaults.
- 
+  alpha: 0.5
+  colormap: default
+force_reprocess: false
+disable_tqdm: false
