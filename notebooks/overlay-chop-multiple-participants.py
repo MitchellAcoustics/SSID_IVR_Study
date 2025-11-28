@@ -34,14 +34,14 @@ logging.basicConfig(
 )
 
 # Participants to process
-PARTICIPANTS = ["P42"]
+PARTICIPANTS = ["P12","P39"]
 # Number of frames to process
 N_FRAMES_PROC = None #  fps * seconds or None
 
 # Directory
 local_data_dir = Path.cwd().parent / "data"
 server_data_dir = Path("/Volumes/ritd-ag-project-rd01wq-tober63/SSID IVR Study 1/")
-output_dir = local_data_dir.joinpath("output/P42/")
+output_dir = local_data_dir.joinpath("output/AV6")
 
 # Check if the server data directory exists
 assert server_data_dir.is_dir(), "Server data directory not found"

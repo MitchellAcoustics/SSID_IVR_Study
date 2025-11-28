@@ -1,5 +1,5 @@
-input: /Users/yuqiliang/Documents/Github/data/video_processing/P48/P48_chopped_fixedfps.mp4
-output_dir: /Users/yuqiliang/Documents/Github/data/citgyseg_test/autoresume_test_05/P48
+input: /Users/yuqiliang/Documents/Github/data/output/AV6/P12_chopped_fixedfps.mp4
+output_dir: /Users/yuqiliang/Documents/Github/data/cityseg_test/P12
 ignore_files: null
 model:
   name: facebook/mask2former-swin-large-cityscapes-semantic
