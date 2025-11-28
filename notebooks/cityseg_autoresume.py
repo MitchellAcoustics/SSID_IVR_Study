@@ -2,6 +2,11 @@
 CitySeg Auto-Resume Processing Script with H5 Merging
 Automatically processes video, checks completion, resumes if interrupted,
 and merges all H5 files into a single output file.
+how to use:
+1. Configure INPUT_VIDEO, OUTPUT_DIR, CITYSEG_CONFIG, MAX_RETRIES, MERGE
+_BATCH_SIZE below
+2. save
+3. type "caffeinate -i uv run notebooks/cityseg_autoresume.py" or "uv run notebooks/cityseg_autoresume.py" in the terminal
 """
 
 import os
@@ -16,10 +21,10 @@ import sys
 # ======================== USER CONFIGURATION ========================
 
 # Input video to process
-INPUT_VIDEO = "/Users/yuqiliang/Documents/Github/data/video_processing/P48/P48_chopped_fixedfps.mp4"
+INPUT_VIDEO = "/Users/yuqiliang/Documents/Github/data/output/AV6/P12_chopped_fixedfps.mp4"
 
 # Output directory where H5 files will be saved
-OUTPUT_DIR = "/Users/yuqiliang/Documents/Github/data/citgyseg_test/autoresume_test_05/P48"
+OUTPUT_DIR = "/Users/yuqiliang/Documents/Github/data/cityseg_test/P12"
 
 # Path to CitySeg config.yaml file
 CITYSEG_CONFIG = "/Users/yuqiliang/Documents/Github/SSID_IVR_Study/cityseg_configs/config.yaml"
@@ -30,7 +35,7 @@ MAX_RETRIES = 20
 # Batch size for H5 merging (frames per batch)
 # Smaller values use less memory but are slower
 # Recommended: 20-100
-MERGE_BATCH_SIZE = 50
+MERGE_BATCH_SIZE = 60
 
 # ====================================================================
 
@@ -113,6 +118,11 @@ def check_progress(h5_file):
             processed_frames = f['segmentation'].shape[0]
             total_frames = metadata['total_video_frames']
             fps = metadata['fps']
+            
+        if processed_frames == 0 and total_frames == 1:
+            print("⚠️ Detected last-frame edge case → marking as complete")
+            
+            return total_frames, total_frames, True
         
         is_complete = (processed_frames >= total_frames)
         
@@ -215,7 +225,6 @@ def merge_all_h5_files(h5_file_list, output_path, batch_size=50):
         shutil.copy2(h5_file_list[0], output_path)
         print(f"✓ Copied: {h5_file_list[0]} -> {output_path}")
         
-        # 读取并返回元数据
         try:
             with h5py.File(h5_file_list[0], 'r') as f:
                 meta_bytes = f['metadata'][()]
@@ -255,6 +264,10 @@ def merge_all_h5_files(h5_file_list, output_path, batch_size=50):
                 seg_dtype = f['segmentation'].dtype
                 meta_bytes = f['metadata'][()]
                 
+                if seg_shape[0] == 0:
+                    print(f"⚠️ Skipping empty H5 file: {h5_path}")
+                    continue
+
                 
                 if isinstance(meta_bytes, bytes):
                     meta = json.loads(meta_bytes.decode('utf-8'))

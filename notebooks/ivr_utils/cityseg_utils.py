@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 from typing import Dict, Any, Tuple
 import pandas as pd
+import cv2
 
 
 def _load_hdf_file(file_path: Path) -> Tuple[h5py.File, Dict[str, Any]]:
@@ -68,25 +69,69 @@ class CitySegData:
         Returns:
             np.ndarray: Segmentation mask.
         """
-        return self.hdf_file["segmentation"][()]
+        return self.hdf_file["segmentation"]
     
-    def match_gaze_with_masks(
-        self, 
-        gaze_data: np.ndarray,      
-        output_path: Path = None
-    ) -> np.ndarray:
+    def export_segmentation_video(
+        self,
+        output_path: Path,
+        fps: float = None,
+        codec: str = "mp4v",
+    ) -> None:
         """
-        Matches gaze data with segmentation masks.
+        Export the segmentation masks in the HDF file as a colorized MP4 video.
 
-        Returns: 
-            [frame_index, x, y, session id ,class_id]
+        Args:
+            output_path (Path): Path to the output video file (.mp4).
+            fps (float, optional): Frames per second for the output video. If None,
+                                   will try to use metadata["fps"] or fallback to 30.0.
+            codec (str, optional): FourCC codec string for cv2.VideoWriter. Default: "mp4v".
         """
-        seg_masks = self.get_segmentation_mask()
+        seg_masks = self.hdf_file["segmentation"]  # shape: (num_frames, H, W)
+        num_frames, H, W = seg_masks.shape
+
+        
+        if fps is None:
+            fps = float(self.metadata.get("fps", 30.0))
+
+        palette = self.palette  # shape: (num_classes, 3), uint8, RGB
+
+        
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        fourcc = cv2.VideoWriter_fourcc(*codec)
+        writer = cv2.VideoWriter(str(output_path), fourcc, fps, (W, H))
+
+        if not writer.isOpened():
+            raise RuntimeError(f"Could not open video writer for {output_path}")
+
+
+        for i in range(num_frames):
+            mask = seg_masks[i]  
+
+            mask = np.clip(mask, 0, palette.shape[0] - 1).astype(np.int32)
+
+            rgb_frame = palette[mask]  # uint8
+
+            bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
+
+            writer.write(bgr_frame)
+
+        writer.release()
+        print(f"[INFO] Segmentation video saved to: {output_path}")
+
+
+    def match_gaze_with_masks(
+    self, 
+    gaze_data: np.ndarray,      
+    output_path: Path = None
+        ) -> np.ndarray:
+
+        seg_masks = self.hdf_file["segmentation"]
         num_frames, H, W = seg_masks.shape
 
         results = []
         for entry in gaze_data:
-            frame_index, x, y , session_id = entry
+            frame_index, x, y, session_id = entry
             x = int(x)
             y = int(y)
             frame_index = int(frame_index)
@@ -96,13 +141,15 @@ class CitySegData:
                 0 <= x < W and
                 0 <= y < H
             )
-            class_id = seg_masks[frame_index, y, x] if valid else -1
+            
+            class_id = int(seg_masks[frame_index, y, x]) if valid else -1
             results.append([frame_index, x, y, session_id, class_id])
-            result_array = np.array(results, dtype=object)
-       
+        
+        result_array = np.array(results, dtype=object)
+   
         if output_path:
             np.save(output_path, result_array)
-    
+
         return result_array
 
     def calculate_percentage_of_mask(self, gaze_data: np.ndarray) -> np.ndarray:
