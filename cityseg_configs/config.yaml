@@ -1,0 +1,23 @@
+input: /Users/yuqiliang/Documents/Github/data/output/AV6/P12_chopped_fixedfps.mp4
+output_dir: /Users/yuqiliang/Documents/Github/data/cityseg_test/P12
+ignore_files: null
+model:
+  name: facebook/mask2former-swin-large-cityscapes-semantic
+  model_type: null
+  max_size: null
+  device: mps
+  dataset: semantic-sidewalk
+  num_workers: 0
+  pipe_batch: 10
+frame_step: 1
+batch_size: 10
+output_fps: null
+save_raw_segmentation: true
+save_colored_segmentation: true
+save_overlay: true
+analyze_results: true
+visualization:
+  alpha: 0.5
+  colormap: default
+force_reprocess: false
+disable_tqdm: false

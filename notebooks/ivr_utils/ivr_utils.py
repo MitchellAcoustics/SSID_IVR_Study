@@ -32,6 +32,7 @@ from typing import Union, Optional, Tuple, List
 import av  # For advanced video operations
 import pandas as pd
 from tqdm.auto import tqdm, trange
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ def find_participant_files(
 
     # Find eyetracking video
     scenario_vid_dir = part_csv_path.parents[1] / "Screen Recording"
-    part_vid_l = list(scenario_vid_dir.rglob(f"*{participant_id}*.wmv"))
+    part_vid_l = list(scenario_vid_dir.rglob(f"*{participant_id}_*.wmv"))
     assert len(part_vid_l) == 1, "Participant video not found or more than one found"
 
     part_vid_path = part_vid_l[0]
@@ -388,8 +389,10 @@ def process_video(
     )
 
     current_point_index = 0
+    chopped_frame_index = 0
     skip_frames = False
-
+    gaze_data = [] 
+    
     for frame_index in trange(n_frames_proc):
         ret, frame = video.read()
         if not ret:
@@ -422,6 +425,12 @@ def process_video(
                 x, y = gaze_overlay_coords(points, current_point_index)
                 cv2.circle(frame, (x, y), 50, (0, 250, 250), -1)
                 out_gazeoverlay.write(frame)
+  
+            gaze_data.append([chopped_frame_index, x, y, points["Respondent Annotations active"].iloc[current_point_index]])
+            chopped_frame_index += 1 
+
+    gaze_npy_path = output_chopped_path.with_suffix(".npy")
+    np.save(gaze_npy_path, np.array(gaze_data))    
 
     logger.debug("chopping_video - releasing resources")
 
